@@ -41,12 +41,15 @@ sudo /usr/local/bin/docker compose up -d --build
 
 # 4. Create the database schema (one-off).
 # The runtime image is trimmed and has no drizzle-kit, so the schema is synced
-# from the full build image with push enabled. Re-run after collection changes.
+# from the full build image. NOTE: Payload only applies `push` when NOT in
+# production (it expects migrations in prod), so this one-off runs with
+# NODE_ENV=development against the production DB purely to create the schema.
+# The running app stays NODE_ENV=production. Re-run after collection changes.
 source .env
 sudo /usr/local/bin/docker build --target builder -t kaizhou-builder \
   --build-arg NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL" .
 sudo /usr/local/bin/docker run --rm --network kaizhou_default \
-  -e NODE_ENV=production -e PAYLOAD_DB_PUSH=true \
+  -e NODE_ENV=development -e PAYLOAD_DB_PUSH=true \
   -e DATABASE_URL="postgres://kaizhou:${POSTGRES_PASSWORD}@db:5432/kaizhou" \
   -e PAYLOAD_SECRET="$PAYLOAD_SECRET" -e NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL" \
   kaizhou-builder pnpm payload run scripts/db-push.ts
