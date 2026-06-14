@@ -3,7 +3,7 @@ import Image from "next/image";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { richTextConverters } from "@/lib/richtext-converters";
-import { SealStamp } from "@/components/shared/SealStamp";
+import { Logo } from "@/components/shared/Logo";
 import { Placeholder } from "@/components/shared/Placeholder";
 import { getSiteSettings } from "@/lib/site-settings";
 
@@ -24,7 +24,7 @@ export async function Footer() {
         <div className="grid gap-12 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-3">
-              <SealStamp size={56} />
+              <Logo size={56} />
               <div>
                 <div className="font-calligraphy text-2xl text-paper">{settings.siteName}</div>
                 <div className="font-sans-zh text-[10px] tracking-[0.3em] uppercase text-paper/50 mt-1">

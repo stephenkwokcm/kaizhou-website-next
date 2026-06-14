@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
-import { SealStamp } from "@/components/shared/SealStamp";
+import { Logo } from "@/components/shared/Logo";
 import { MobileNav } from "./MobileNav";
 
 export const NAV_ITEMS = [
@@ -43,7 +43,7 @@ export function Header({ siteName = "香港開州同鄉會" }: { siteName?: stri
       >
         <div className="container-page flex h-20 items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-3 group">
-            <SealStamp size={44} className="transition-transform group-hover:rotate-[-3deg]" />
+            <Logo size={44} priority className="transition-transform group-hover:scale-105" />
             <span
               className={cn(
                 "font-calligraphy text-xl md:text-2xl leading-none transition-colors",
