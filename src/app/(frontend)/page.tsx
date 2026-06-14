@@ -4,9 +4,12 @@ import { AboutPreviewSection } from "@/components/sections/landing/AboutPreviewS
 import { LatestNewsSection } from "@/components/sections/landing/LatestNewsSection";
 import { UpcomingEventsSection } from "@/components/sections/landing/UpcomingEventsSection";
 import { HometownShowcaseSection } from "@/components/sections/landing/HometownShowcaseSection";
+import { SITE_NAME, SITE_NAME_EN } from "@/lib/seo";
 
-// Title/description/OG inherit the site-wide defaults from the layout.
+// Landing page shows the full bilingual name in the <title>; description/OG
+// inherit the site-wide defaults from the layout.
 export const metadata: Metadata = {
+  title: { absolute: `${SITE_NAME} — ${SITE_NAME_EN}` },
   alternates: { canonical: "/" },
 };
 
