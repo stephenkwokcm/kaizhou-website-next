@@ -12,7 +12,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 
 const MEMBERS: { order: number; title: string; name: string; bio?: string }[] = [
-  { order: 1, title: "會長", name: "沈宗燕", bio: "資訊科技業 · 管理層" },
+  { order: 1, title: "會長", name: "沈明心", bio: "資訊科技業 · 管理層" },
   { order: 2, title: "常務副會長", name: "余樂", bio: "國際貿易業 · 管理層" },
   { order: 3, title: "常務副會長", name: "楊先偉", bio: "餐飲服務業 · 管理" },
   { order: 4, title: "副會長", name: "扈麗霞" },

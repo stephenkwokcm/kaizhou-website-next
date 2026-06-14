@@ -27,8 +27,8 @@ export function HeroSection() {
         style={prefersReducedMotion ? undefined : { y: bgY, scale: 1.1 }}
       >
         <Image
-          src="/images/kaizhou/hero-river-bridge.jpg"
-          alt="開州山水 — 漢豐湖與長江"
+          src="/images/kaizhou/hanfeng-lake-hero.jpg"
+          alt="開州 · 漢豐湖"
           fill
           priority
           quality={90}
