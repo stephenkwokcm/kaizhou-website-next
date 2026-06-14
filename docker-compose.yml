@@ -1,0 +1,47 @@
+name: kaizhou
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: kaizhou-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kaizhou
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: kaizhou
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaizhou -d kaizhou"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # No host port published — only reachable by the app over the internal network.
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?set NEXT_PUBLIC_SITE_URL in .env}
+    image: kaizhou-app:latest
+    container_name: kaizhou-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgres://kaizhou:${POSTGRES_PASSWORD}@db:5432/kaizhou
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    volumes:
+      - media:/app/media
+    ports:
+      # Host 3100 -> container 3000. Cloudflare Tunnel routes kaizhou.hk here.
+      - "3100:3000"
+
+volumes:
+  db_data:
+  media:

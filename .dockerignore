@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.env*
+media
+data
+/IMG_*.JPG
+tsconfig.tsbuildinfo
+kaizhou-claude-code-prompt.md
+*.log
+.DS_Store
+Dockerfile
+.dockerignore
+docker-compose.yml
