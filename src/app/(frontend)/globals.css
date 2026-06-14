@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f5f0e8;
+  --color-paper-dark: #ede4d3;
+  --color-ink: #1a1a1a;
+  --color-ink-soft: #2c2c2c;
+  --color-vermillion: #8b2323;
+  --color-vermillion-deep: #6e1a1a;
+  --color-gold: #c5a55a;
+  --color-gold-soft: #d9c084;
+  --color-stone: #8a857a;
+
+  --font-serif: var(--font-noto-serif-tc), "Noto Serif TC", "Songti SC", "STSong", serif;
+  --font-calligraphy: var(--font-bakudai), "Bakudai", "STKaiti", "Kaiti SC", cursive;
+  --font-sans: var(--font-noto-sans-tc), "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink-soft);
+    font-family: var(--font-serif);
+    line-height: 1.8;
+  }
+
+  ::selection {
+    background: var(--color-vermillion);
+    color: var(--color-paper);
+  }
+}
+
+@layer utilities {
+  /* Subtle rice-paper grain overlay — pure CSS, no image dependency */
+  .bg-rice-paper {
+    background-color: var(--color-paper);
+    background-image:
+      radial-gradient(rgba(139, 35, 35, 0.025) 1px, transparent 1px),
+      radial-gradient(rgba(60, 50, 30, 0.04) 1px, transparent 1px),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.45  0 0 0 0 0.32  0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 22px 22px, 33px 33px, 240px 240px;
+    background-position: 0 0, 11px 17px, 0 0;
+  }
+
+  .bg-rice-paper-dark {
+    background-color: var(--color-ink);
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .text-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  .text-vertical-mixed {
+    writing-mode: vertical-rl;
+  }
+
+  .font-calligraphy {
+    font-family: var(--font-calligraphy);
+    letter-spacing: 0.05em;
+  }
+
+  .font-serif-zh {
+    font-family: var(--font-serif);
+  }
+
+  .font-sans-zh {
+    font-family: var(--font-sans);
+  }
+
+  .ink-shadow {
+    text-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .container-page {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 2.5rem;
+    }
+  }
+}
