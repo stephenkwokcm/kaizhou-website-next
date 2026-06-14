@@ -39,7 +39,7 @@ export function MobileNav({ open, onClose, pathname }: Props) {
             type="button"
             aria-label="關閉選單"
             onClick={onClose}
-            className="absolute top-6 right-6 inline-flex h-12 w-12 items-center justify-center text-ink"
+            className="absolute top-6 right-6 z-10 inline-flex h-12 w-12 items-center justify-center text-ink"
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
               <path d="M6 6l12 12M18 6L6 18" />
