@@ -6,6 +6,7 @@ import { MediaImage } from "@/components/shared/MediaImage";
 import { safePayloadQuery } from "@/lib/payload";
 import { pickImage, type ImageData } from "@/lib/media";
 import { pageMetadata } from "@/lib/seo";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export const metadata: Metadata = pageMetadata(
   "最新消息",
@@ -21,16 +22,6 @@ type NewsItem = {
   slug?: string;
   image?: ImageData | null;
 };
-
-/* PLACEHOLDER */
-const FALLBACK: NewsItem[] = [
-  { id: 1, title: "本會理事會換屆選舉圓滿舉行", excerpt: "第十二屆理事會於本月選出，新任會長對未來會務發展提出五年規劃。", publishDate: "2026-04-08" },
-  { id: 2, title: "重慶開州區政府代表團訪港", excerpt: "代表團與本會就教育、商貿、文化交流等議題進行深入交流。", publishDate: "2026-03-22" },
-  { id: 3, title: "2026 春茗聯歡晚宴順利舉辦", excerpt: "逾三百位鄉親出席，會長致辭時回顧過去一年會務成就。", publishDate: "2026-02-15" },
-  { id: 4, title: "本會獎學金計劃頒獎典禮舉行", excerpt: "本年度共有 28 位同學獲得本會獎學金，總金額逾港幣三十萬元。", publishDate: "2026-01-30" },
-  { id: 5, title: "歲末關懷探訪長者活動", excerpt: "理事們親臨多個長者中心，為旅港鄉親長者送上節日祝福與慰問品。", publishDate: "2025-12-20" },
-  { id: 6, title: "開州區政協主席率團蒞港訪問", excerpt: "代表團一行十二人於本月訪港，與本會理事舉行座談交流。", publishDate: "2025-11-18" },
-];
 
 export default async function NewsPage() {
   const news = await safePayloadQuery<NewsItem[]>(async (payload) => {
@@ -50,8 +41,7 @@ export default async function NewsPage() {
     }));
   }, []);
 
-  const items = news.length > 0 ? news : FALLBACK;
-  const isPlaceholder = news.length === 0;
+  const items = news;
 
   return (
     <article className="pt-32 pb-24">
@@ -63,13 +53,7 @@ export default async function NewsPage() {
           <SectionTitle zh="最新消息" en="Association News & Announcements" seal="新聞" />
         </RevealOnScroll>
 
-        {isPlaceholder && (
-          <RevealOnScroll delay={0.1}>
-            <p className="mt-6 text-xs font-sans-zh text-stone italic">
-              {/* PLACEHOLDER */}* 以下為示範內容，真實新聞將由 CMS 後台發佈。
-            </p>
-          </RevealOnScroll>
-        )}
+        {items.length === 0 && <EmptyState message="暫無最新消息" />}
 
         <div className="mt-14 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item, idx) => (

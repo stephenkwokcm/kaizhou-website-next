@@ -12,7 +12,7 @@ if (!rawSiteUrl && process.env.NODE_ENV === "production") {
 export const SITE_URL = (rawSiteUrl || "http://localhost:3000").replace(/\/+$/, "");
 
 export const SITE_NAME = "香港開州同鄉會";
-export const SITE_NAME_EN = "Hong Kong Kaizhou Fellowship Association";
+export const SITE_NAME_EN = "Hong Kong Kaizhou Association";
 
 export const SITE_DESCRIPTION =
   "香港開州同鄉會 — 連繫旅港鄉親、傳承家鄉文化、促進香港與重慶開州的兩地交流。";

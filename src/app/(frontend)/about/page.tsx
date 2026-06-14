@@ -7,6 +7,7 @@ import { MediaImage } from "@/components/shared/MediaImage";
 import { safePayloadQuery } from "@/lib/payload";
 import { pickImage, type ImageData } from "@/lib/media";
 import { pageMetadata } from "@/lib/seo";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export const metadata: Metadata = pageMetadata(
   "關於我們",
@@ -21,16 +22,6 @@ type Member = {
   bio?: string;
   photo?: ImageData | null;
 };
-
-/* PLACEHOLDER */
-const FALLBACK_COMMITTEE: Member[] = [
-  { id: 1, name: "沈○○", title: "創會會長", bio: "本會創辦人及首任會長。長期關心旅港鄉親福祉，倡議成立同鄉會以凝聚鄉誼、傳承家鄉文化。她亦為本港知名社會服務工作者。" },
-  { id: 2, name: "李○○", title: "副會長", bio: "資深教育工作者，亦為本會教育委員會主席。" },
-  { id: 3, name: "王○○", title: "副會長", bio: "商界翹楚，多年來熱心社會公益事業。" },
-  { id: 4, name: "陳○○", title: "秘書長", bio: "負責本會日常行政及會員聯絡事務。" },
-  { id: 5, name: "黃○○", title: "財務長", bio: "資深會計師，掌管本會財務及審計工作。" },
-  { id: 6, name: "周○○", title: "理事", bio: "青年事務委員會召集人。" },
-];
 
 export default async function AboutPage() {
   const committee = await safePayloadQuery<Member[]>(async (payload) => {
@@ -49,7 +40,7 @@ export default async function AboutPage() {
     }));
   }, []);
 
-  const members = committee.length > 0 ? committee : FALLBACK_COMMITTEE;
+  const members = committee;
 
   return (
     <article className="pt-32 pb-16">
@@ -121,6 +112,8 @@ export default async function AboutPage() {
         <RevealOnScroll>
           <SectionTitle zh="現任理事會" en="Current Committee" seal="理事" />
         </RevealOnScroll>
+
+        {members.length === 0 && <EmptyState message="理事會名單即將公佈" />}
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {members.map((m, idx) => (

@@ -1,4 +1,4 @@
-# 香港開州同鄉會 — Hong Kong Kaizhou Fellow Townsmen Association
+# 香港開州同鄉會 — Hong Kong Kaizhou Association
 
 Bilingual (zh-Hant / en) Next.js 16 + Payload CMS 3 website for the 香港開州同鄉會, designed in a traditional Chinese ink-wash (水墨) aesthetic.
 

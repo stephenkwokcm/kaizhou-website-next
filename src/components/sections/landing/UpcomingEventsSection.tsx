@@ -3,6 +3,7 @@ import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
 import { SectionTitle } from "@/components/shared/SectionTitle";
 import { safePayloadQuery } from "@/lib/payload";
 import { lexicalToPlainText } from "@/lib/richtext";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 type EventItem = {
   id: string | number;
@@ -11,31 +12,6 @@ type EventItem = {
   eventDate: string;
   location?: string;
 };
-
-/* PLACEHOLDER */
-const FALLBACK_EVENTS: EventItem[] = [
-  {
-    id: "e1",
-    title: "端午鄉誼茶聚",
-    eventDate: "2026-06-08T14:00:00",
-    location: "本會會址 · 尖沙咀",
-    description: "與鄉親共度端午佳節，品嘗家鄉粽子，分享童年記憶。",
-  },
-  {
-    id: "e2",
-    title: "家鄉開州歷史文化講座",
-    eventDate: "2026-07-19T19:30:00",
-    location: "九龍中央圖書館演講廳",
-    description: "邀請開州地方文史專家主講「漢豐千年：從漢豐縣到開州區」。",
-  },
-  {
-    id: "e3",
-    title: "中秋鄉親聯歡晚會",
-    eventDate: "2026-09-26T18:30:00",
-    location: "九龍灣國際展貿中心",
-    description: "中秋雅集、文藝表演、抽獎活動，歡迎攜眷出席。",
-  },
-];
 
 export async function UpcomingEventsSection() {
   const events = await safePayloadQuery<EventItem[]>(async (payload) => {
@@ -54,13 +30,15 @@ export async function UpcomingEventsSection() {
     }));
   }, []);
 
-  const items = events.length > 0 ? events : FALLBACK_EVENTS;
+  const items = events;
 
   return (
     <section className="container-page py-24">
       <RevealOnScroll>
         <SectionTitle zh="活動預告" en="Upcoming Events" seal="活動" />
       </RevealOnScroll>
+
+      {items.length === 0 && <EmptyState message="暫無活動預告" />}
 
       <ul className="mt-12 max-w-3xl mx-auto">
         {items.map((event, idx) => (

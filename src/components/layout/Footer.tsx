@@ -28,7 +28,7 @@ export async function Footer() {
               <div>
                 <div className="font-calligraphy text-2xl text-paper">{settings.siteName}</div>
                 <div className="font-sans-zh text-[10px] tracking-[0.3em] uppercase text-paper/50 mt-1">
-                  Hong Kong Kaizhou Fellowship Association
+                  Hong Kong Kaizhou Association
                 </div>
               </div>
             </div>
@@ -112,7 +112,7 @@ export async function Footer() {
 
         <div className="mt-14 pt-8 border-t border-paper/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <p className="text-xs font-sans-zh text-paper/50">
-            © {new Date().getFullYear()} {settings.siteName} Hong Kong Kaizhou Fellowship Association. All rights reserved.
+            © {new Date().getFullYear()} {settings.siteName} Hong Kong Kaizhou Association. All rights reserved.
           </p>
           <p className="text-xs font-sans-zh text-paper/40 tracking-widest">
             巴山蒼翠連香江 · 漢豐源遠繫鄉情

@@ -4,6 +4,7 @@ import { SectionTitle } from "@/components/shared/SectionTitle";
 import { MediaImage } from "@/components/shared/MediaImage";
 import { safePayloadQuery } from "@/lib/payload";
 import { pickImage, type ImageData } from "@/lib/media";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 type NewsCard = {
   id: string | number;
@@ -13,31 +14,6 @@ type NewsCard = {
   slug?: string;
   image?: ImageData | null;
 };
-
-/* PLACEHOLDER */
-const FALLBACK_NEWS: NewsCard[] = [
-  {
-    id: "p1",
-    title: "本會首屆理事會正式成立",
-    excerpt: "首屆理事會於本月選出，會長對未來會務發展提出規劃，期望帶領同鄉會穩步啟航。",
-    publishDate: "2026-04-08",
-    slug: "#",
-  },
-  {
-    id: "p2",
-    title: "重慶開州區政府代表團訪港",
-    excerpt: "代表團與本會就教育、商貿、文化交流等議題進行深入交流，並參觀本會會址。",
-    publishDate: "2026-03-22",
-    slug: "#",
-  },
-  {
-    id: "p3",
-    title: "2026 春茗聯歡晚宴順利舉辦",
-    excerpt: "逾百位鄉親出席春茗，會長致辭時展望本會未來發展，並感謝各界人士的鼎力支持。",
-    publishDate: "2026-02-15",
-    slug: "#",
-  },
-];
 
 export async function LatestNewsSection() {
   const news = await safePayloadQuery<NewsCard[]>(async (payload) => {
@@ -57,7 +33,7 @@ export async function LatestNewsSection() {
     }));
   }, []);
 
-  const items = news.length > 0 ? news : FALLBACK_NEWS;
+  const items = news;
 
   return (
     <section className="bg-paper-dark/40 py-24">
@@ -71,6 +47,8 @@ export async function LatestNewsSection() {
             查看全部 <span>→</span>
           </Link>
         </RevealOnScroll>
+
+        {items.length === 0 && <EmptyState message="暫無最新消息" />}
 
         <div className="grid gap-8 md:grid-cols-3">
           {items.map((item, idx) => (

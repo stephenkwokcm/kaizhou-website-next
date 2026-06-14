@@ -93,7 +93,7 @@ export function HeroSection() {
             <p className="mt-4 font-sans-zh text-paper/70 text-xs tracking-[0.4em] uppercase">
               Hong Kong Kaizhou
               <br />
-              Fellowship Association
+              Association
             </p>
           </motion.div>
         </div>
