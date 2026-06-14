@@ -17,10 +17,8 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
 
-async function main() {
-  const payload = await getPayload({ config });
-  payload.logger.info("[db-push] schema sync complete");
-  process.exit(0);
-}
-
-void main();
+// Top-level await so `payload run` waits for the schema sync to finish before
+// the process exits (a fire-and-forget call would exit before push completes).
+const payload = await getPayload({ config });
+payload.logger.info("[db-push] schema sync complete");
+process.exit(0);
