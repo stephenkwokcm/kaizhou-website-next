@@ -3,11 +3,11 @@ import Image from "next/image";
 import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
 import { SectionTitle } from "@/components/shared/SectionTitle";
 import { InkDivider } from "@/components/shared/InkDivider";
-import { MediaImage } from "@/components/shared/MediaImage";
 import { safePayloadQuery } from "@/lib/payload";
 import { pickImage, type ImageData } from "@/lib/media";
 import { pageMetadata } from "@/lib/seo";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { CommitteeRoster } from "@/components/sections/about/CommitteeRoster";
 
 export const metadata: Metadata = pageMetadata(
   "關於我們",
@@ -113,28 +113,11 @@ export default async function AboutPage() {
           <SectionTitle zh="現任理事會" en="Current Committee" seal="理事" />
         </RevealOnScroll>
 
-        {members.length === 0 && <EmptyState message="理事會名單即將公佈" />}
-
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {members.map((m, idx) => (
-            <RevealOnScroll key={m.id} delay={idx * 0.05}>
-              <article className="group flex gap-5 p-6 border border-stone/15 hover:border-vermillion/40 hover:bg-paper-dark/30 transition-all">
-                <MediaImage image={m.photo} aspectRatio="3 / 4" className="w-24 shrink-0" label="" sizes="96px" />
-                <div>
-                  <div className="font-sans-zh text-[10px] tracking-[0.3em] uppercase text-vermillion mb-1">
-                    {m.title || "理事"}
-                  </div>
-                  <h3 className="font-calligraphy text-2xl text-ink mb-2">{m.name}</h3>
-                  {m.bio && (
-                    <p className="font-serif-zh text-xs text-ink-soft/80 leading-relaxed line-clamp-3">
-                      {m.bio}
-                    </p>
-                  )}
-                </div>
-              </article>
-            </RevealOnScroll>
-          ))}
-        </div>
+        {members.length === 0 ? (
+          <EmptyState message="理事會名單即將公佈" />
+        ) : (
+          <CommitteeRoster members={members} />
+        )}
       </section>
 
       <InkDivider />
