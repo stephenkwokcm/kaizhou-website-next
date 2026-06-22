@@ -2,31 +2,33 @@ import type { CollectionConfig } from "payload";
 
 export const Enquiries: CollectionConfig = {
   slug: "enquiries",
-  labels: {
-    singular: "聯絡查詢",
-    plural: "聯絡查詢",
-  },
+  labels: { singular: "聯絡查詢", plural: "聯絡查詢" },
   admin: {
+    group: "媒體・查詢",
     useAsTitle: "name",
     defaultColumns: ["name", "email", "createdAt", "readStatus"],
+    description: "網站聯絡表單的查詢會自動出現在這裡，無法手動新增。",
   },
   access: {
-    create: () => true,
+    // Public submissions come through /api/contact-submit (local API, overrides
+    // access), so blocking create here only removes the admin "Create" button
+    // and the public REST create — the contact form keeps working.
+    create: () => false,
     read: ({ req }) => Boolean(req.user),
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
   },
   fields: [
-    { name: "name", type: "text", required: true },
-    { name: "email", type: "email", required: true },
-    { name: "phone", type: "text" },
-    { name: "message", type: "textarea", required: true },
+    { name: "name", type: "text", required: true, label: "姓名" },
+    { name: "email", type: "email", required: true, label: "電郵" },
+    { name: "phone", type: "text", label: "電話" },
+    { name: "message", type: "textarea", required: true, label: "查詢內容" },
     {
       name: "readStatus",
       type: "checkbox",
       defaultValue: false,
       label: "已讀",
-      admin: { position: "sidebar" },
+      admin: { position: "sidebar", description: "勾選表示已處理此查詢。" },
     },
   ],
 };
