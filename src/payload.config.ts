@@ -45,6 +45,7 @@ export default buildConfig({
         Logo: "/components/admin/Logo",
         Icon: "/components/admin/Icon",
       },
+      beforeLogin: ["/components/admin/BeforeLogin"],
     },
     importMap: {
       baseDir: path.resolve(dirname),

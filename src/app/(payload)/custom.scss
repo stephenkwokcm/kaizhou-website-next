@@ -25,3 +25,28 @@
   --style-radius-m: 8px;
   --style-radius-l: 12px;
 }
+
+/* Login screen branding (mock 風格 1 — centered card) */
+.kz-before-login {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.kz-before-login__title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+.kz-before-login__sub {
+  font-size: 0.95rem;
+  color: #6e1a1a;
+  margin: 0.25rem 0 0.15rem;
+}
+.kz-before-login__en {
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #c5a55a;
+  margin: 0;
+}
