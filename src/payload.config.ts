@@ -50,6 +50,19 @@ export default buildConfig({
         dashboard: { Component: "/components/admin/Dashboard" },
       },
     },
+    livePreview: {
+      url: ({ data, collectionConfig }) => {
+        const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+        const segment = collectionConfig?.slug === "activities" ? "activities" : "news";
+        return `${base}/${segment}/${encodeURIComponent(String(data?.slug ?? ""))}`;
+      },
+      collections: ["news"],
+      breakpoints: [
+        { label: "手機", name: "mobile", width: 390, height: 844 },
+        { label: "平板", name: "tablet", width: 768, height: 1024 },
+        { label: "桌面", name: "desktop", width: 1440, height: 900 },
+      ],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
