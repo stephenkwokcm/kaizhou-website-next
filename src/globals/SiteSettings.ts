@@ -28,19 +28,15 @@ export const SiteSettings: GlobalConfig = {
       label: "社交媒體連結",
       fields: [
         {
+          // Kept as free text: existing rows hold arbitrary platform names
+          // (e.g. "WeChat") and the value is never rendered (the footer reads
+          // only `url`), so an enum conversion would fail the schema push for
+          // no benefit.
           name: "platform",
-          type: "select",
+          type: "text",
           label: "平台",
           required: true,
-          options: [
-            { label: "Facebook", value: "facebook" },
-            { label: "WeChat 微信", value: "wechat" },
-            { label: "Instagram", value: "instagram" },
-            { label: "YouTube", value: "youtube" },
-            { label: "Threads", value: "threads" },
-            { label: "小紅書", value: "xiaohongshu" },
-            { label: "LinkedIn", value: "linkedin" },
-          ],
+          admin: { description: "例：Facebook、WeChat、Instagram、YouTube、小紅書" },
         },
         { name: "url", type: "text", required: true, label: "連結網址", admin: { description: "完整網址，含 https://" } },
       ],

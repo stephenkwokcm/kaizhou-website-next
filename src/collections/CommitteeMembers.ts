@@ -19,12 +19,16 @@ export const CommitteeMembers: CollectionConfig = {
       type: "select",
       label: "職銜",
       admin: { description: "從清單選擇職銜。" },
-      // Values equal labels so existing Chinese data needs no migration.
+      // Values == labels (Chinese). This set is a SUPERSET of every 職銜
+      // already in the DB (incl. 創會會長 / 財務長) so the text→enum schema
+      // push converts cleanly. Add any new title here BEFORE assigning it.
       options: [
+        { label: "創會會長", value: "創會會長" },
         { label: "會長", value: "會長" },
         { label: "副會長", value: "副會長" },
         { label: "秘書長", value: "秘書長" },
         { label: "副秘書長", value: "副秘書長" },
+        { label: "財務長", value: "財務長" },
         { label: "財務", value: "財務" },
         { label: "常務理事", value: "常務理事" },
         { label: "理事", value: "理事" },
