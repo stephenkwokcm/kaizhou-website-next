@@ -27,16 +27,19 @@ async function load() {
           title: d.title,
           href: `/admin/collections/news/${d.id}`,
           meta: `消息 · ${fmt(d.updatedAt)}`,
+          _ts: new Date(d.updatedAt ?? 0).getTime(),
         })),
         ...recentAct.docs.map((d) => ({
           id: `a${d.id}`,
           title: d.title,
           href: `/admin/collections/activities/${d.id}`,
           meta: `活動 · ${fmt(d.updatedAt)}`,
+          _ts: new Date(d.updatedAt ?? 0).getTime(),
         })),
       ]
-        .sort((x, y) => (x.id < y.id ? 1 : -1))
-        .slice(0, 6);
+        .sort((x, y) => y._ts - x._ts)
+        .slice(0, 6)
+        .map(({ _ts, ...item }) => item);
 
       const pendingItems: Item[] = pending.docs.map((d) => ({
         id: d.id,
