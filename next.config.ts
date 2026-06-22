@@ -51,13 +51,31 @@ const adminCsp = [
   "form-action 'self'",
 ].join("; ");
 
+// next/image only renders an ABSOLUTE image src whose host is allow-listed.
+// Payload serves media as absolute URLs off this same origin (serverURL =
+// NEXT_PUBLIC_SITE_URL), so derive the allowed pattern from that env var —
+// localhost in dev, the real domain in prod — instead of hardcoding a host.
+const siteUrlForImages =
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const {
+  protocol: imgProtocol,
+  hostname: imgHostname,
+  port: imgPort,
+} = new URL(siteUrlForImages);
+
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
   // Remove the X-Powered-By: Next.js fingerprinting header.
   poweredByHeader: false,
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: imgProtocol.replace(":", "") as "http" | "https",
+        hostname: imgHostname,
+        ...(imgPort ? { port: imgPort } : {}),
+      },
+    ],
     qualities: [75, 88, 90],
   },
   async headers() {
