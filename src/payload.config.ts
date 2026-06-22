@@ -33,6 +33,13 @@ export default buildConfig({
     user: Users.slug,
     meta: {
       titleSuffix: " — 香港開州同鄉會",
+      description: "香港開州同鄉會內容管理系統",
+    },
+    components: {
+      graphics: {
+        Logo: "/components/admin/Logo",
+        Icon: "/components/admin/Icon",
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
