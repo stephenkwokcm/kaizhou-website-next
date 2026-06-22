@@ -29,6 +29,7 @@ export default buildConfig({
   cors: [process.env.NEXT_PUBLIC_SITE_URL].filter(Boolean) as string[],
   csrf: [process.env.NEXT_PUBLIC_SITE_URL].filter(Boolean) as string[],
   admin: {
+    theme: "light",
     user: Users.slug,
     meta: {
       titleSuffix: " — 香港開州同鄉會",

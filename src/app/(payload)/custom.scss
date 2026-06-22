@@ -1,4 +1,27 @@
-/* Custom Payload admin overrides — keep brand-aligned with the public site */
-:root {
-  --color-success-500: #8B2323;
+/* Brand-aligned light theme for the Payload admin — 香港開州同鄉會.
+   Overrides Payload's runtime --theme-* variables (NOT --color-*). */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap');
+
+:root,
+[data-theme='light'] {
+  /* Primary/brand accent — Payload renders primary actions from the success ramp */
+  --theme-success-50: #f7ecec;
+  --theme-success-100: #ecd2d2;
+  --theme-success-400: #a23636;
+  --theme-success-500: #8b2323;
+  --theme-success-600: #6e1a1a;
+  --theme-success-700: #581515;
+
+  /* Warm paper surfaces */
+  --theme-bg: #f5f0e8;
+  --theme-elevation-0: #fffdf8;
+  --theme-input-bg: #fffdf8;
+  --theme-border-color: #e0d5bf;
+  --theme-text: #1a1a1a;
+
+  /* Typography + shape */
+  --font-body: 'Noto Sans TC', system-ui, -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --style-radius-s: 5px;
+  --style-radius-m: 8px;
+  --style-radius-l: 12px;
 }
