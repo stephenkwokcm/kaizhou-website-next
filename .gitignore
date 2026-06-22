@@ -14,3 +14,6 @@ src/payload-types.ts
 /IMG_*.JPG
 /tsconfig.tsbuildinfo
 /kaizhou-claude-code-prompt.md
+
+# Visual brainstorming companion (superpowers)
+.superpowers/
