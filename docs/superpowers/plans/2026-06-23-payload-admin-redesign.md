@@ -37,6 +37,9 @@
 - `src/app/(frontend)/news/[slug]/NewsLivePreview.tsx` — client body for News, driven by `useLivePreview`.
 - `src/app/(frontend)/activities/[slug]/page.tsx` — new public activity detail page.
 - `src/app/(frontend)/activities/[slug]/ActivityLivePreview.tsx` — client body for an activity.
+- `src/lib/slugify.ts` — shared slug generator (used by News & Activities).
+- `src/lib/format.ts` — `formatDateZh` (shared by the live-preview bodies).
+- `src/lib/prose.ts` — `PROSE_CLASS` Tailwind classes for rendered rich text.
 
 **Modified:**
 - `src/payload.config.ts` — theme, admin components (graphics/dashboard/beforeLogin), editor features, livePreview, meta.
@@ -206,17 +209,18 @@ git commit -m "feat(admin): brand logo, nav icon, and admin metadata" -m "<trail
 ## Task 3: Localize News & Activities collections
 
 **Files:**
+- Create: `src/lib/slugify.ts`
 - Modify: `src/collections/News.ts` (replace whole file)
 - Modify: `src/collections/Activities.ts` (replace whole file)
 
 - [ ] **Step 1: Expected result** — In the admin, News and Activities are grouped under 內容; every field shows a Chinese label + help; `slug` is hidden from the form (still auto-generated).
 
-- [ ] **Step 2: Replace `src/collections/News.ts`:**
+- [ ] **Step 2: Create the shared slugify helper, then replace the two collections.**
+
+`src/lib/slugify.ts` (new — replaces the per-file copies):
 
 ```ts
-import type { CollectionConfig } from "payload";
-
-const slugify = (value: string) =>
+export const slugify = (value: string) =>
   value
     .toLowerCase()
     .trim()
@@ -224,6 +228,13 @@ const slugify = (value: string) =>
     .replace(/[^\w一-鿿-]/g, "")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+```
+
+Then replace `src/collections/News.ts`:
+
+```ts
+import type { CollectionConfig } from "payload";
+import { slugify } from "@/lib/slugify";
 
 export const News: CollectionConfig = {
   slug: "news",
@@ -300,15 +311,7 @@ export const News: CollectionConfig = {
 
 ```ts
 import type { CollectionConfig } from "payload";
-
-const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[\s　]+/g, "-")
-    .replace(/[^\w一-鿿-]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+import { slugify } from "@/lib/slugify";
 
 export const Activities: CollectionConfig = {
   slug: "activities",
@@ -399,8 +402,8 @@ Expected: exits 0. In the admin: a 內容 group in the nav contains 最新消息
 - [ ] **Step 5: Commit.**
 
 ```bash
-git add src/collections/News.ts src/collections/Activities.ts
-git commit -m "feat(admin): localize and group News & Activities; hide slug" -m "<trailer>"
+git add src/lib/slugify.ts src/collections/News.ts src/collections/Activities.ts
+git commit -m "feat(admin): localize & group News/Activities; extract slugify; hide slug" -m "<trailer>"
 ```
 
 ---
@@ -1096,6 +1099,7 @@ git commit -m "feat(admin): custom operational dashboard with stats + recent + p
 
 **Files:**
 - Modify: `package.json` (add dependency)
+- Create: `src/lib/format.ts`, `src/lib/prose.ts`
 - Create: `src/app/(frontend)/news/[slug]/NewsLivePreview.tsx`
 - Modify: `src/app/(frontend)/news/[slug]/page.tsx` (render body via the client component)
 - Modify: `src/payload.config.ts` (`admin.livePreview`)
@@ -1113,7 +1117,29 @@ pnpm add @payloadcms/live-preview-react@3.85.0
 ```
 Expected: package added to `dependencies` in `package.json`.
 
-- [ ] **Step 3: Create `src/app/(frontend)/news/[slug]/NewsLivePreview.tsx`:**
+- [ ] **Step 3: Create the shared display helpers, then the News client body.**
+
+`src/lib/format.ts` (new):
+
+```ts
+/** Format an ISO date as Traditional Chinese "YYYY 年 M 月 D 日". */
+export function formatDateZh(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso ?? "";
+  return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
+}
+```
+
+`src/lib/prose.ts` (new — shared by both live-preview bodies):
+
+```ts
+/** Tailwind classes for rendered rich-text article bodies. */
+export const PROSE_CLASS =
+  "font-serif-zh text-lg leading-[2] text-ink-soft prose-content [&_p]:mb-6 [&_h2]:font-calligraphy [&_h2]:text-3xl [&_h2]:text-ink [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:font-serif-zh [&_h3]:font-semibold [&_h3]:text-xl [&_h3]:mt-8 [&_h3]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-vermillion [&_blockquote]:pl-6 [&_a]:text-vermillion [&_a]:underline";
+```
+
+`src/app/(frontend)/news/[slug]/NewsLivePreview.tsx` (new):
 
 ```tsx
 "use client";
@@ -1126,19 +1152,13 @@ import { richTextConverters } from "@/lib/richtext-converters";
 import { MediaImage } from "@/components/shared/MediaImage";
 import { InkDivider } from "@/components/shared/InkDivider";
 import { pickImage } from "@/lib/media";
+import { formatDateZh } from "@/lib/format";
+import { PROSE_CLASS } from "@/lib/prose";
+import { SITE_URL } from "@/lib/seo";
 import type { News } from "@/payload-types";
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-function formatDate(iso?: string | null) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return iso ?? "";
-  return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
-}
-
 export function NewsLivePreview({ initialDoc }: { initialDoc: News }) {
-  const { data } = useLivePreview<News>({ initialData: initialDoc, serverURL: SERVER_URL, depth: 2 });
+  const { data } = useLivePreview<News>({ initialData: initialDoc, serverURL: SITE_URL, depth: 2 });
   const image = pickImage(data.featuredImage, "hero");
 
   return (
@@ -1150,7 +1170,7 @@ export function NewsLivePreview({ initialDoc }: { initialDoc: News }) {
         ← 返回新聞列表
       </Link>
 
-      <p className="font-sans-zh text-xs tracking-widest text-stone mb-4">{formatDate(data.publishDate)}</p>
+      <p className="font-sans-zh text-xs tracking-widest text-stone mb-4">{formatDateZh(data.publishDate)}</p>
       <h1 className="font-calligraphy text-4xl md:text-5xl text-ink leading-tight mb-8">{data.title}</h1>
 
       <MediaImage image={image} aspectRatio="16 / 9" label="專題圖片" className="mb-10" sizes="(min-width: 768px) 768px, 100vw" />
@@ -1161,7 +1181,7 @@ export function NewsLivePreview({ initialDoc }: { initialDoc: News }) {
         </p>
       )}
 
-      <div className="font-serif-zh text-lg leading-[2] text-ink-soft prose-content [&_p]:mb-6 [&_h2]:font-calligraphy [&_h2]:text-3xl [&_h2]:text-ink [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:font-serif-zh [&_h3]:font-semibold [&_h3]:text-xl [&_h3]:mt-8 [&_h3]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-vermillion [&_blockquote]:pl-6 [&_a]:text-vermillion [&_a]:underline">
+      <div className={PROSE_CLASS}>
         {data.content ? (
           <RichText converters={richTextConverters} data={data.content as SerializedEditorState} />
         ) : (
@@ -1322,7 +1342,7 @@ Expected: type check + production build succeed (this exercises the rewritten pa
 - [ ] **Step 7: Commit.**
 
 ```bash
-git add package.json pnpm-lock.yaml "src/app/(frontend)/news/[slug]/NewsLivePreview.tsx" "src/app/(frontend)/news/[slug]/page.tsx" src/payload.config.ts
+git add package.json pnpm-lock.yaml src/lib/format.ts src/lib/prose.ts "src/app/(frontend)/news/[slug]/NewsLivePreview.tsx" "src/app/(frontend)/news/[slug]/page.tsx" src/payload.config.ts
 git commit -m "feat(live-preview): enable live preview for News" -m "<trailer>"
 ```
 
@@ -1365,19 +1385,13 @@ import { richTextConverters } from "@/lib/richtext-converters";
 import { MediaImage } from "@/components/shared/MediaImage";
 import { InkDivider } from "@/components/shared/InkDivider";
 import { pickImage } from "@/lib/media";
+import { formatDateZh } from "@/lib/format";
+import { PROSE_CLASS } from "@/lib/prose";
+import { SITE_URL } from "@/lib/seo";
 import type { Activity } from "@/payload-types";
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-function formatDate(iso?: string | null) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return iso ?? "";
-  return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
-}
-
 export function ActivityLivePreview({ initialDoc }: { initialDoc: Activity }) {
-  const { data } = useLivePreview<Activity>({ initialData: initialDoc, serverURL: SERVER_URL, depth: 2 });
+  const { data } = useLivePreview<Activity>({ initialData: initialDoc, serverURL: SITE_URL, depth: 2 });
   const hero = pickImage(data.featuredImage, "hero");
   const gallery = (data.gallery ?? [])
     .map((g) => pickImage(g.image, "card"))
@@ -1393,7 +1407,7 @@ export function ActivityLivePreview({ initialDoc }: { initialDoc: Activity }) {
       </Link>
 
       <p className="font-sans-zh text-xs tracking-widest text-stone mb-4">
-        {formatDate(data.eventDate)}
+        {formatDateZh(data.eventDate)}
         {data.location ? ` · ${data.location}` : ""}
       </p>
       <h1 className="font-calligraphy text-4xl md:text-5xl text-ink leading-tight mb-8">{data.title}</h1>
@@ -1401,7 +1415,7 @@ export function ActivityLivePreview({ initialDoc }: { initialDoc: Activity }) {
       <MediaImage image={hero} aspectRatio="16 / 9" label="活動相片" className="mb-10" sizes="(min-width: 768px) 768px, 100vw" />
 
       {data.description && (
-        <div className="font-serif-zh text-lg leading-[2] text-ink-soft prose-content [&_p]:mb-6 [&_h2]:font-calligraphy [&_h2]:text-3xl [&_h2]:text-ink [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:font-serif-zh [&_h3]:font-semibold [&_h3]:text-xl [&_h3]:mt-8 [&_h3]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-vermillion [&_blockquote]:pl-6 [&_a]:text-vermillion [&_a]:underline">
+        <div className={PROSE_CLASS}>
           <RichText converters={richTextConverters} data={data.description as SerializedEditorState} />
         </div>
       )}
