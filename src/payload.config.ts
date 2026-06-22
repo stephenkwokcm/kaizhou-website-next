@@ -46,6 +46,9 @@ export default buildConfig({
         Icon: "/components/admin/Icon",
       },
       beforeLogin: ["/components/admin/BeforeLogin"],
+      views: {
+        dashboard: { Component: "/components/admin/Dashboard" },
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),

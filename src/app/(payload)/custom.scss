@@ -50,3 +50,27 @@
   color: #c5a55a;
   margin: 0;
 }
+
+/* Custom dashboard (Direction B) */
+.kz-dash { padding: 1.5rem; }
+.kz-dash__stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.kz-dash__stat {
+  background: #fffdf8; border: 1px solid #e0d5bf; border-radius: 10px;
+  padding: 1.25rem; text-align: center; text-decoration: none; display: block;
+}
+.kz-dash__stat--alert { border-color: #8b2323; background: #fbf2ee; }
+.kz-dash__num { display: block; font-family: 'Noto Serif TC', serif; font-size: 2rem; font-weight: 700; color: #8b2323; line-height: 1; }
+.kz-dash__lbl { display: block; margin-top: 0.4rem; font-size: 0.8rem; color: #2c2c2c; }
+.kz-dash__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.kz-dash__panel { background: #fffdf8; border: 1px solid #e0d5bf; border-radius: 10px; padding: 1.1rem 1.25rem; }
+.kz-dash__panel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+.kz-dash__panel-head h2 { font-family: 'Noto Serif TC', serif; font-size: 1rem; margin: 0; border-left: 3px solid #8b2323; padding-left: 0.5rem; }
+.kz-dash__panel-head a { color: #8b2323; font-size: 0.8rem; text-decoration: none; }
+.kz-dash__row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; border-top: 1px dashed #e0d5bf; color: #2c2c2c; text-decoration: none; }
+.kz-dash__row:hover { color: #8b2323; }
+.kz-dash__meta { color: #8a857a; font-size: 0.75rem; white-space: nowrap; }
+.kz-dash__empty { color: #8a857a; font-size: 0.85rem; padding: 0.5rem 0; }
+@media (max-width: 1024px) {
+  .kz-dash__stats { grid-template-columns: repeat(2, 1fr); }
+  .kz-dash__cols { grid-template-columns: 1fr; }
+}
