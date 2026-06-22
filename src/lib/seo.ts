@@ -27,6 +27,11 @@ export function newsPath(slug: string): string {
   return `/news/${encodeURIComponent(slug)}`;
 }
 
+/** Canonical path for an activity (slugs may contain Chinese). */
+export function activityPath(slug: string): string {
+  return `/activities/${encodeURIComponent(slug)}`;
+}
+
 /**
  * Standard metadata for a static page: unique title/description, canonical
  * URL and matching Open Graph / Twitter tags. (Page-level `openGraph`

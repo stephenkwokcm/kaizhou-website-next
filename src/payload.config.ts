@@ -56,7 +56,7 @@ export default buildConfig({
         const segment = collectionConfig?.slug === "activities" ? "activities" : "news";
         return `${base}/${segment}/${encodeURIComponent(String(data?.slug ?? ""))}`;
       },
-      collections: ["news"],
+      collections: ["news", "activities"],
       breakpoints: [
         { label: "手機", name: "mobile", width: 390, height: 844 },
         { label: "平板", name: "tablet", width: 768, height: 1024 },
