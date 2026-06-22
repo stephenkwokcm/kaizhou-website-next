@@ -3,7 +3,12 @@ import { fileURLToPath } from "url";
 import sharp from "sharp";
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import {
+  lexicalEditor,
+  FixedToolbarFeature,
+  HeadingFeature,
+  UploadFeature,
+} from "@payloadcms/richtext-lexical";
 import { en } from "@payloadcms/translations/languages/en";
 import { zhTw } from "@payloadcms/translations/languages/zhTw";
 
@@ -29,15 +34,55 @@ export default buildConfig({
   cors: [process.env.NEXT_PUBLIC_SITE_URL].filter(Boolean) as string[],
   csrf: [process.env.NEXT_PUBLIC_SITE_URL].filter(Boolean) as string[],
   admin: {
+    theme: "light",
     user: Users.slug,
     meta: {
       titleSuffix: " — 香港開州同鄉會",
+      description: "香港開州同鄉會內容管理系統",
+    },
+    components: {
+      graphics: {
+        Logo: "/components/admin/Logo",
+        Icon: "/components/admin/Icon",
+      },
+      beforeLogin: ["/components/admin/BeforeLogin"],
+      views: {
+        dashboard: { Component: "/components/admin/Dashboard" },
+      },
+    },
+    livePreview: {
+      url: ({ data, collectionConfig }) => {
+        const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+        const segment = collectionConfig?.slug === "activities" ? "activities" : "news";
+        return `${base}/${segment}/${encodeURIComponent(String(data?.slug ?? ""))}`;
+      },
+      collections: ["news", "activities"],
+      breakpoints: [
+        { label: "手機", name: "mobile", width: 390, height: 844 },
+        { label: "平板", name: "tablet", width: 768, height: 1024 },
+        { label: "桌面", name: "desktop", width: 1440, height: 900 },
+      ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      FixedToolbarFeature(),
+      HeadingFeature({ enabledHeadingSizes: ["h2", "h3"] }),
+      UploadFeature({
+        collections: {
+          media: {
+            fields: [
+              { name: "caption", type: "text", label: { "zh-TW": "圖片說明", en: "Caption" } },
+            ],
+          },
+        },
+      }),
+    ],
+  }),
   // Admin UI language: default to Traditional Chinese (繁體中文); keep English available.
   i18n: {
     supportedLanguages: { "zh-TW": zhTw, en },

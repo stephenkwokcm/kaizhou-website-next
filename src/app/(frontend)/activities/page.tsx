@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
 import { SectionTitle } from "@/components/shared/SectionTitle";
 import { InkDivider } from "@/components/shared/InkDivider";
@@ -19,6 +20,7 @@ export const metadata: Metadata = pageMetadata(
 
 type Activity = {
   id: string | number;
+  slug?: string;
   title: string;
   eventDate: string;
   location?: string;
@@ -45,6 +47,7 @@ export default async function ActivitiesPage() {
     const map = (docs: ActivityDoc[]): Activity[] =>
       docs.map((d) => ({
         id: d.id,
+        slug: d.slug ?? undefined,
         title: d.title,
         eventDate: d.eventDate,
         location: d.location ?? undefined,
@@ -168,7 +171,11 @@ function ActivityCard({
           {activity.location ? ` · ${activity.location}` : ""}
         </div>
         <h3 className="font-serif-zh text-xl text-ink mb-2 group-hover:text-vermillion transition-colors">
-          {activity.title}
+          {activity.slug ? (
+            <Link href={`/activities/${encodeURIComponent(activity.slug)}`}>{activity.title}</Link>
+          ) : (
+            activity.title
+          )}
         </h3>
         {activity.excerpt && (
           <p className="font-serif-zh text-sm text-ink-soft/80 leading-relaxed line-clamp-3">
