@@ -3,7 +3,12 @@ import { fileURLToPath } from "url";
 import sharp from "sharp";
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import {
+  lexicalEditor,
+  FixedToolbarFeature,
+  HeadingFeature,
+  UploadFeature,
+} from "@payloadcms/richtext-lexical";
 import { en } from "@payloadcms/translations/languages/en";
 import { zhTw } from "@payloadcms/translations/languages/zhTw";
 
@@ -45,7 +50,22 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      FixedToolbarFeature(),
+      HeadingFeature({ enabledHeadingSizes: ["h2", "h3"] }),
+      UploadFeature({
+        collections: {
+          media: {
+            fields: [
+              { name: "caption", type: "text", label: { "zh-TW": "圖片說明", en: "Caption" } },
+            ],
+          },
+        },
+      }),
+    ],
+  }),
   // Admin UI language: default to Traditional Chinese (繁體中文); keep English available.
   i18n: {
     supportedLanguages: { "zh-TW": zhTw, en },
