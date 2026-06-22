@@ -120,7 +120,7 @@ export default async function Dashboard() {
             <a href="/admin/collections/enquiries">查看全部</a>
           </div>
           {pending.length === 0 ? (
-            <p className="kz-dash__empty">沒有未讀查詢 🎉</p>
+            <p className="kz-dash__empty">目前沒有未讀查詢</p>
           ) : (
             pending.map((it) => (
               <a key={it.id} className="kz-dash__row" href={it.href}>

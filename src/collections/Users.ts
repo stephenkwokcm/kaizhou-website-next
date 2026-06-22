@@ -17,6 +17,7 @@ export const Users: CollectionConfig = {
     },
   },
   access: {
+    // Who can enter /admin
     admin: ({ req: { user } }) => isAdmin(user),
     create: ({ req: { user } }) => isAdmin(user),
     read: ({ req: { user } }) => isAdmin(user),
@@ -32,12 +33,15 @@ export const Users: CollectionConfig = {
       hasMany: true,
       required: true,
       defaultValue: ["admin"],
+      // Persist roles into the JWT so access checks avoid a DB lookup.
       saveToJWT: true,
       options: [
         { label: "管理員", value: "admin" },
         { label: "編輯", value: "editor" },
       ],
       access: {
+        // Only an admin can set or change roles (prevents self-elevation,
+        // including at creation time if collection-create is ever loosened).
         create: ({ req: { user } }) => isAdmin(user),
         update: ({ req: { user } }) => isAdmin(user),
       },
