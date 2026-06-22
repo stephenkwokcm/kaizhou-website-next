@@ -1,46 +1,31 @@
 import type { CollectionConfig } from "payload";
-
-const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[\s\u3000]+/g, "-")
-    .replace(/[^\w\u4e00-\u9fff-]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+import { slugify } from "@/lib/slugify";
 
 export const Activities: CollectionConfig = {
   slug: "activities",
-  labels: {
-    singular: "會務活動",
-    plural: "會務活動",
-  },
+  labels: { singular: "會務活動", plural: "會務活動" },
   admin: {
+    group: "內容",
     useAsTitle: "title",
     defaultColumns: ["title", "eventDate", "eventType"],
+    listSearchableFields: ["title", "location"],
+    description: "管理活動預告與活動回顧。",
   },
-  access: {
-    read: () => true,
-  },
+  access: { read: () => true },
   fields: [
-    {
-      name: "title",
-      type: "text",
-      required: true,
-    },
+    { name: "title", type: "text", required: true, label: "標題" },
     {
       name: "slug",
       type: "text",
+      label: "網址名稱",
       unique: true,
       index: true,
-      admin: { position: "sidebar" },
+      admin: { hidden: true, description: "留空會自動產生。" },
       hooks: {
         beforeValidate: [
           ({ value, data }) => {
             if (typeof value === "string" && value.length > 0) return value;
-            if (data?.title && typeof data.title === "string") {
-              return slugify(data.title);
-            }
+            if (data?.title && typeof data.title === "string") return slugify(data.title);
             return value;
           },
         ],
@@ -49,15 +34,14 @@ export const Activities: CollectionConfig = {
     {
       name: "eventDate",
       type: "date",
+      label: "活動日期",
       required: true,
-      admin: {
-        position: "sidebar",
-        date: { pickerAppearance: "dayAndTime" },
-      },
+      admin: { position: "sidebar", date: { pickerAppearance: "dayAndTime" } },
     },
     {
       name: "eventType",
       type: "select",
+      label: "活動類型",
       defaultValue: "upcoming",
       options: [
         { label: "活動預告", value: "upcoming" },
@@ -68,28 +52,29 @@ export const Activities: CollectionConfig = {
     {
       name: "location",
       type: "text",
+      label: "地點",
+      admin: { description: "場地名稱或地址，例：香港灣仔會議展覽中心。" },
     },
     {
       name: "featuredImage",
       type: "upload",
       relationTo: "media",
+      label: "封面圖片",
+      admin: { description: "建議尺寸 1920×1080 或以上。" },
     },
     {
       name: "description",
       type: "richText",
+      label: "活動內容",
+      admin: { description: "詳述活動內容、流程、參加者等。" },
     },
     {
       name: "gallery",
       type: "array",
+      label: "活動相片",
       labels: { singular: "圖片", plural: "圖片集" },
-      fields: [
-        {
-          name: "image",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-        },
-      ],
+      admin: { description: "上傳活動相片（建議 5–20 張）。" },
+      fields: [{ name: "image", type: "upload", relationTo: "media", required: true, label: "圖片" }],
     },
   ],
 };
