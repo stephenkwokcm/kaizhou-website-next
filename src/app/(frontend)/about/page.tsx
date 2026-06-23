@@ -40,8 +40,6 @@ export default async function AboutPage() {
     }));
   }, []);
 
-  const members = committee;
-
   return (
     <article className="pt-32 pb-16">
       {/* Intro */}
@@ -113,10 +111,10 @@ export default async function AboutPage() {
           <SectionTitle zh="現任理事會" en="Current Committee" seal="理事" />
         </RevealOnScroll>
 
-        {members.length === 0 ? (
+        {committee.length === 0 ? (
           <EmptyState message="理事會名單即將公佈" />
         ) : (
-          <CommitteeRoster members={members} />
+          <CommitteeRoster members={committee} />
         )}
       </section>
 
@@ -154,9 +152,8 @@ export default async function AboutPage() {
   );
 }
 
-function OrgChart() {
-  /* PLACEHOLDER — simple visual org chart */
-  const Box = ({ children, accent }: { children: React.ReactNode; accent?: boolean }) => (
+function Box({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
+  return (
     <div
       className={`px-6 py-4 text-center font-sans-zh text-sm border ${
         accent
@@ -167,6 +164,10 @@ function OrgChart() {
       {children}
     </div>
   );
+}
+
+function OrgChart() {
+  /* PLACEHOLDER — simple visual org chart */
   return (
     <div className="space-y-6">
       <div className="flex justify-center">

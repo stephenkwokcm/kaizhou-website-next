@@ -6,6 +6,7 @@ import { MediaImage } from "@/components/shared/MediaImage";
 import { safePayloadQuery } from "@/lib/payload";
 import { pickImage, type ImageData } from "@/lib/media";
 import { pageMetadata } from "@/lib/seo";
+import { formatDateZh } from "@/lib/format";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 export const metadata: Metadata = pageMetadata(
@@ -41,8 +42,6 @@ export default async function NewsPage() {
     }));
   }, []);
 
-  const items = news;
-
   return (
     <article className="pt-32 pb-24">
       <section className="container-page">
@@ -53,10 +52,10 @@ export default async function NewsPage() {
           <SectionTitle zh="最新消息" en="Association News & Announcements" seal="新聞" />
         </RevealOnScroll>
 
-        {items.length === 0 && <EmptyState message="暫無最新消息" />}
+        {news.length === 0 && <EmptyState message="暫無最新消息" />}
 
         <div className="mt-14 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, idx) => (
+          {news.map((item, idx) => (
             <RevealOnScroll key={item.id} delay={(idx % 3) * 0.08}>
               <Link
                 href={item.slug ? `/news/${item.slug}` : "#"}
@@ -64,7 +63,7 @@ export default async function NewsPage() {
               >
                 <MediaImage image={item.image} aspectRatio="4 / 3" label="新聞圖片" className="mb-5" />
                 <div className="font-sans-zh text-xs tracking-widest text-stone mb-2">
-                  {formatDate(item.publishDate)}
+                  {formatDateZh(item.publishDate)}
                 </div>
                 <h2 className="font-serif-zh text-xl text-ink leading-snug group-hover:text-vermillion transition-colors mb-3">
                   {item.title}
@@ -84,10 +83,4 @@ export default async function NewsPage() {
       </section>
     </article>
   );
-}
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return iso;
-  return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
 }

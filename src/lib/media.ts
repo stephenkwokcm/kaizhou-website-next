@@ -19,12 +19,13 @@ export function pickImage(
 ): ImageData | null {
   if (!value || typeof value === "number") return null;
   const sized = size ? value.sizes?.[size] : null;
-  const url = sized?.url || value.url;
-  if (!url) return null;
+  // Use the named size only when it actually resolved to a URL; else the original.
+  const src = sized?.url ? sized : value;
+  if (!src.url) return null;
   return {
-    url,
+    url: src.url,
     alt: value.alt ?? undefined,
-    width: (sized?.url ? sized.width : value.width) ?? undefined,
-    height: (sized?.url ? sized.height : value.height) ?? undefined,
+    width: src.width ?? undefined,
+    height: src.height ?? undefined,
   };
 }

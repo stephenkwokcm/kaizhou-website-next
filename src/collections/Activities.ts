@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { slugify } from "@/lib/slugify";
+import { slugField } from "@/lib/slugField";
 import { adminOrEditor, anyone } from "@/access";
 
 export const Activities: CollectionConfig = {
@@ -20,23 +20,7 @@ export const Activities: CollectionConfig = {
   },
   fields: [
     { name: "title", type: "text", required: true, label: "標題" },
-    {
-      name: "slug",
-      type: "text",
-      label: "網址名稱",
-      unique: true,
-      index: true,
-      admin: { hidden: true, description: "留空會自動產生。" },
-      hooks: {
-        beforeValidate: [
-          ({ value, data }) => {
-            if (typeof value === "string" && value.length > 0) return value;
-            if (data?.title && typeof data.title === "string") return slugify(data.title);
-            return value;
-          },
-        ],
-      },
-    },
+    slugField(),
     {
       name: "eventDate",
       type: "date",

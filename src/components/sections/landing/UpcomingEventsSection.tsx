@@ -30,18 +30,16 @@ export async function UpcomingEventsSection() {
     }));
   }, []);
 
-  const items = events;
-
   return (
     <section className="container-page py-24">
       <RevealOnScroll>
         <SectionTitle zh="活動預告" en="Upcoming Events" seal="活動" />
       </RevealOnScroll>
 
-      {items.length === 0 && <EmptyState message="暫無活動預告" />}
+      {events.length === 0 && <EmptyState message="暫無活動預告" />}
 
       <ul className="mt-12 max-w-3xl mx-auto">
-        {items.map((event, idx) => (
+        {events.map((event, idx) => (
           <RevealOnScroll as="li" key={event.id} delay={idx * 0.1}>
             <article className="group flex gap-6 md:gap-10 py-8 border-b border-stone/15 last:border-0">
               <DateBadge iso={event.eventDate} />

@@ -11,6 +11,7 @@ import type { Activity as ActivityDoc } from "@/payload-types";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { pageMetadata, SITE_URL } from "@/lib/seo";
+import { formatDateZh } from "@/lib/format";
 
 export const metadata: Metadata = pageMetadata(
   "會務活動",
@@ -56,9 +57,6 @@ export default async function ActivitiesPage() {
       }));
     return { upcoming: map(up.docs), past: map(past.docs) };
   }, { upcoming: [] as Activity[], past: [] as Activity[] });
-
-  const upcoming = data.upcoming;
-  const past = data.past;
 
   // Structured data only for real CMS events — never the DB-down fallback,
   // which would publish fictitious events to crawlers.
@@ -109,11 +107,11 @@ export default async function ActivitiesPage() {
           <SectionTitle zh="活動預告" en="Upcoming" seal="預告" />
         </RevealOnScroll>
 
-        {upcoming.length === 0 ? (
+        {data.upcoming.length === 0 ? (
           <EmptyState message="暫無活動預告" />
         ) : (
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {upcoming.map((a, idx) => (
+            {data.upcoming.map((a, idx) => (
               <ActivityCard key={a.id} activity={a} delay={idx * 0.08} accent />
             ))}
           </div>
@@ -127,11 +125,11 @@ export default async function ActivitiesPage() {
           <SectionTitle zh="活動回顧" en="Past Events" seal="回顧" />
         </RevealOnScroll>
 
-        {past.length === 0 ? (
+        {data.past.length === 0 ? (
           <EmptyState message="暫無活動回顧" />
         ) : (
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {past.map((a, idx) => (
+            {data.past.map((a, idx) => (
               <ActivityCard key={a.id} activity={a} delay={idx * 0.08} />
             ))}
           </div>
@@ -165,9 +163,7 @@ function ActivityCard({
           )}
         </div>
         <div className="font-sans-zh text-xs tracking-widest text-stone mb-2">
-          {valid
-            ? `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`
-            : activity.eventDate}
+          {formatDateZh(activity.eventDate)}
           {activity.location ? ` · ${activity.location}` : ""}
         </div>
         <h3 className="font-serif-zh text-xl text-ink mb-2 group-hover:text-vermillion transition-colors">

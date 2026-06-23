@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { safePayloadQuery } from "@/lib/payload";
+import { formatDateZh } from "@/lib/format";
 
 type Item = { id: string | number; title: string; href: string; meta: string };
 
@@ -22,24 +24,20 @@ async function load() {
         ]);
 
       const recent: Item[] = [
-        ...recentNews.docs.map((d) => ({
-          id: `n${d.id}`,
-          title: d.title,
-          href: `/admin/collections/news/${d.id}`,
-          meta: `消息 · ${fmt(d.updatedAt)}`,
-          _ts: new Date(d.updatedAt ?? 0).getTime(),
-        })),
-        ...recentAct.docs.map((d) => ({
-          id: `a${d.id}`,
-          title: d.title,
-          href: `/admin/collections/activities/${d.id}`,
-          meta: `活動 · ${fmt(d.updatedAt)}`,
-          _ts: new Date(d.updatedAt ?? 0).getTime(),
-        })),
+        ...recentNews.docs.map((d) => ({ d, kind: "消息", base: "news" as const })),
+        ...recentAct.docs.map((d) => ({ d, kind: "活動", base: "activities" as const })),
       ]
-        .sort((x, y) => y._ts - x._ts)
+        .sort(
+          (x, y) =>
+            new Date(y.d.updatedAt ?? 0).getTime() - new Date(x.d.updatedAt ?? 0).getTime(),
+        )
         .slice(0, 6)
-        .map(({ _ts, ...item }) => item);
+        .map(({ d, kind, base }) => ({
+          id: `${base[0]}${d.id}`,
+          title: d.title,
+          href: `/admin/collections/${base}/${d.id}`,
+          meta: `${kind} · ${fmt(d.updatedAt)}`,
+        }));
 
       const pendingItems: Item[] = pending.docs.map((d) => ({
         id: d.id,
@@ -69,67 +67,116 @@ function fmt(iso?: string | null) {
   return isNaN(d.getTime()) ? "" : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+/* --- inline line icons (stroke = currentColor) --- */
+const sv = {
+  width: 22,
+  height: 22,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.7,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
+const IconMail = () => (
+  <svg {...sv}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+);
+const IconDoc = () => (
+  <svg {...sv}><path d="M14 3v5h5" /><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M8 13h8M8 17h6" /></svg>
+);
+const IconCal = () => (
+  <svg {...sv}><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4" /></svg>
+);
+const IconUsers = () => (
+  <svg {...sv}><circle cx="9" cy="8" r="3" /><path d="M3 20a6 6 0 0 1 12 0" /><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20a6 6 0 0 0-4-5.6" /></svg>
+);
+const IconGear = () => (
+  <svg {...sv}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 2.6V2a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 17 4.6l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" /></svg>
+);
+
 export default async function Dashboard() {
   const { stats, recent, pending } = await load();
+  const today = formatDateZh(new Date().toISOString());
+
+  const cards = [
+    { key: "unread", n: stats.unread, label: "未讀查詢", href: "/admin/collections/enquiries", Icon: IconMail, alert: true },
+    { key: "news", n: stats.news, label: "最新消息", href: "/admin/collections/news", Icon: IconDoc, alert: false },
+    { key: "act", n: stats.activities, label: "會務活動", href: "/admin/collections/activities", Icon: IconCal, alert: false },
+    { key: "mem", n: stats.members, label: "理事會成員", href: "/admin/collections/committee-members", Icon: IconUsers, alert: false },
+  ];
+
   return (
     <div className="kz-dash">
+      <header className="kz-dash__header">
+        <div className="kz-dash__heading">
+          <h1>內容管理系統</h1>
+          <p>香港開州同鄉會</p>
+        </div>
+        <p className="kz-dash__date">{today}</p>
+      </header>
+
       <div className="kz-dash__stats">
-        <a className="kz-dash__stat kz-dash__stat--alert" href="/admin/collections/enquiries">
-          <span className="kz-dash__num">{stats.unread}</span>
-          <span className="kz-dash__lbl">未讀查詢</span>
-        </a>
-        <a className="kz-dash__stat" href="/admin/collections/news">
-          <span className="kz-dash__num">{stats.news}</span>
-          <span className="kz-dash__lbl">最新消息</span>
-        </a>
-        <a className="kz-dash__stat" href="/admin/collections/activities">
-          <span className="kz-dash__num">{stats.activities}</span>
-          <span className="kz-dash__lbl">會務活動</span>
-        </a>
-        <a className="kz-dash__stat" href="/admin/collections/committee-members">
-          <span className="kz-dash__num">{stats.members}</span>
-          <span className="kz-dash__lbl">理事會成員</span>
-        </a>
+        {cards.map(({ key, n, label, href, Icon, alert }) => (
+          <Link key={key} className={`kz-dash__stat${alert ? " kz-dash__stat--alert" : ""}`} href={href}>
+            <span className="kz-dash__stat-icon"><Icon /></span>
+            <span className="kz-dash__stat-body">
+              <span className="kz-dash__num">{n}</span>
+              <span className="kz-dash__lbl">{label}</span>
+            </span>
+          </Link>
+        ))}
       </div>
 
       <div className="kz-dash__cols">
         <section className="kz-dash__panel">
           <div className="kz-dash__panel-head">
             <h2>最近內容</h2>
-            <span>
-              <a href="/admin/collections/news/create">＋ 撰寫消息</a>
-              {" · "}
-              <a href="/admin/collections/activities/create">＋ 新增活動</a>
-            </span>
+            <Link className="kz-dash__link" href="/admin/collections/news/create">＋ 撰寫消息</Link>
           </div>
           {recent.length === 0 ? (
             <p className="kz-dash__empty">暫無內容</p>
           ) : (
-            recent.map((it) => (
-              <a key={it.id} className="kz-dash__row" href={it.href}>
-                <span>{it.title}</span>
-                <span className="kz-dash__meta">{it.meta}</span>
-              </a>
-            ))
+            <ul className="kz-dash__list">
+              {recent.map((it) => (
+                <li key={it.id}>
+                  <Link className="kz-dash__row" href={it.href}>
+                    <span className="kz-dash__row-title">{it.title}</span>
+                    <span className="kz-dash__meta">{it.meta}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           )}
         </section>
 
         <section className="kz-dash__panel">
           <div className="kz-dash__panel-head">
             <h2>待處理查詢</h2>
-            <a href="/admin/collections/enquiries">查看全部</a>
+            <Link className="kz-dash__link" href="/admin/collections/enquiries">查看全部</Link>
           </div>
           {pending.length === 0 ? (
             <p className="kz-dash__empty">目前沒有未讀查詢</p>
           ) : (
-            pending.map((it) => (
-              <a key={it.id} className="kz-dash__row" href={it.href}>
-                <span>{it.title}</span>
-                <span className="kz-dash__meta">{it.meta}</span>
-              </a>
-            ))
+            <ul className="kz-dash__list">
+              {pending.map((it) => (
+                <li key={it.id}>
+                  <Link className="kz-dash__row" href={it.href}>
+                    <span className="kz-dash__dot" aria-hidden="true" />
+                    <span className="kz-dash__row-title">{it.title}</span>
+                    <span className="kz-dash__meta">{it.meta}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           )}
         </section>
+      </div>
+
+      <div className="kz-dash__actions">
+        <Link className="kz-dash__action" href="/admin/collections/news/create"><span className="kz-dash__action-icon"><IconDoc /></span>撰寫消息</Link>
+        <Link className="kz-dash__action" href="/admin/collections/activities/create"><span className="kz-dash__action-icon"><IconCal /></span>新增活動</Link>
+        <Link className="kz-dash__action" href="/admin/collections/committee-members"><span className="kz-dash__action-icon"><IconUsers /></span>管理成員</Link>
+        <Link className="kz-dash__action" href="/admin/globals/site-settings"><span className="kz-dash__action-icon"><IconGear /></span>網站設定</Link>
       </div>
     </div>
   );

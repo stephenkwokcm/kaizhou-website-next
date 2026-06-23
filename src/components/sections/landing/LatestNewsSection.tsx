@@ -4,6 +4,7 @@ import { SectionTitle } from "@/components/shared/SectionTitle";
 import { MediaImage } from "@/components/shared/MediaImage";
 import { safePayloadQuery } from "@/lib/payload";
 import { pickImage, type ImageData } from "@/lib/media";
+import { formatDateZh } from "@/lib/format";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 type NewsCard = {
@@ -33,8 +34,6 @@ export async function LatestNewsSection() {
     }));
   }, []);
 
-  const items = news;
-
   return (
     <section className="bg-paper-dark/40 py-24">
       <div className="container-page">
@@ -48,10 +47,10 @@ export async function LatestNewsSection() {
           </Link>
         </RevealOnScroll>
 
-        {items.length === 0 && <EmptyState message="暫無最新消息" />}
+        {news.length === 0 && <EmptyState message="暫無最新消息" />}
 
         <div className="grid gap-8 md:grid-cols-3">
-          {items.map((item, idx) => (
+          {news.map((item, idx) => (
             <RevealOnScroll key={item.id} delay={idx * 0.1}>
               <Link
                 href={item.slug ? `/news/${item.slug}` : "/news"}
@@ -59,7 +58,7 @@ export async function LatestNewsSection() {
               >
                 <MediaImage image={item.image} aspectRatio="4 / 3" label="新聞圖片" className="mb-5" />
                 <div className="font-sans-zh text-xs tracking-widest text-stone mb-2">
-                  {formatDate(item.publishDate)}
+                  {formatDateZh(item.publishDate)}
                 </div>
                 <h3 className="font-serif-zh text-xl text-ink leading-snug group-hover:text-vermillion transition-colors mb-3">
                   {item.title}
@@ -85,10 +84,4 @@ export async function LatestNewsSection() {
       </div>
     </section>
   );
-}
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return iso;
-  return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
 }
