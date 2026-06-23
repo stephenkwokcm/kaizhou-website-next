@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { slugField } from "@/lib/slugField";
+import { ADMIN_DATE_FORMAT } from "@/lib/format";
 import { adminOrEditor, anyone } from "@/access";
 
 export const News: CollectionConfig = {
@@ -26,7 +27,7 @@ export const News: CollectionConfig = {
       type: "date",
       label: "發佈日期",
       defaultValue: () => new Date().toISOString(),
-      admin: { position: "sidebar", date: { pickerAppearance: "dayAndTime" }, description: "留空預設為今天。" },
+      admin: { position: "sidebar", date: { pickerAppearance: "dayAndTime", displayFormat: ADMIN_DATE_FORMAT }, description: "留空預設為今天。" },
     },
     {
       name: "status",

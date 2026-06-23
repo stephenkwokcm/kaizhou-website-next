@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
 import { SectionTitle } from "@/components/shared/SectionTitle";
 import { InkDivider } from "@/components/shared/InkDivider";
@@ -132,18 +133,19 @@ export default async function AboutPage() {
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <button
+                type="button"
                 disabled
                 className="inline-flex items-center gap-3 bg-vermillion text-paper px-8 py-4 font-sans-zh tracking-widest text-sm cursor-not-allowed opacity-60"
               >
                 下載申請表 <span>↓</span>
                 <span className="text-[10px] opacity-70">(PDF)</span>
               </button>
-              <a
+              <Link
                 href="/contact"
                 className="inline-flex items-center gap-3 border border-paper/40 text-paper px-8 py-4 font-sans-zh tracking-widest text-sm hover:bg-paper/10 transition-colors"
               >
                 查詢詳情 →
-              </a>
+              </Link>
             </div>
           </div>
         </RevealOnScroll>

@@ -45,8 +45,8 @@ export function ActivityLivePreview({ initialDoc }: { initialDoc: Activity }) {
 
       {gallery.length > 0 && (
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
-          {gallery.map((img, i) => (
-            <MediaImage key={i} image={img} aspectRatio="4 / 3" label="活動相片" />
+          {gallery.map((img) => (
+            <MediaImage key={img.url} image={img} aspectRatio="4 / 3" label="活動相片" />
           ))}
         </div>
       )}

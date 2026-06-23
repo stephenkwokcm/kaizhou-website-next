@@ -48,6 +48,9 @@ importers:
       payload:
         specifier: 3.85.0
         version: 3.85.0(graphql@16.14.1)(typescript@5.9.3)
+      payload-oauth2:
+        specifier: 1.0.21
+        version: 1.0.21(payload@3.85.0(graphql@16.14.1)(typescript@5.9.3))
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -57,6 +60,9 @@ importers:
       sharp:
         specifier: 0.34.5
         version: 0.34.5
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.3.0
@@ -2806,6 +2812,12 @@ packages:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
 
+  payload-oauth2@1.0.21:
+    resolution: {integrity: sha512-YSdgiob3o/HN4od0n0FqMoZyENBC2z0YTPLT7DNtpbwUxCnP81Y5lHzIt1tYmGMzPYiA47pJLnsqT7z9UCyNbg==}
+    hasBin: true
+    peerDependencies:
+      payload: ^3
+
   payload@3.85.0:
     resolution: {integrity: sha512-Cb3jX/WRkHhT5oZCx1BikR6fe32Xbld4Esxr0i+dXtHZMjBVgMjaf/oaK81jLRBstbJbUw7Ia/jMrRw82+FlwA==}
     engines: {node: ^18.20.2 || >=20.9.0}
@@ -3231,6 +3243,9 @@ packages:
 
   tabbable@6.4.0:
     resolution: {integrity: sha512-05PUHKSNE8ou2dwIxTngl4EzcnsCDZGJ/iCLtDflR/SHB/ny14rXc+qU5P4mG9JkusiV7EivzY9Mhm55AzAvCg==}
+
+  tailwind-merge@3.6.0:
+    resolution: {integrity: sha512-uxL7qAVQriqRQPAyK3pj66VqskWqoZ37PW94jwOTwNfq/z9oyu1V+eqrZqtR2+fCiXdYOZe/Modt8GtvqNzu+w==}
 
   tailwindcss@4.3.0:
     resolution: {integrity: sha512-y6nxMGB1nMW9R6k96e5gdIFzcfL/gTJRNaqGes1YvkLnPVXzWgbqFF2yLC0T8G774n24cx3Pe8XrKoniCOAH+Q==}
@@ -6540,6 +6555,10 @@ snapshots:
 
   path-type@4.0.0: {}
 
+  payload-oauth2@1.0.21(payload@3.85.0(graphql@16.14.1)(typescript@5.9.3)):
+    dependencies:
+      payload: 3.85.0(graphql@16.14.1)(typescript@5.9.3)
+
   payload@3.85.0(graphql@16.14.1)(typescript@5.9.3):
     dependencies:
       '@next/env': 15.5.15
@@ -7068,6 +7087,8 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   tabbable@6.4.0: {}
+
+  tailwind-merge@3.6.0: {}
 
   tailwindcss@4.3.0: {}
 

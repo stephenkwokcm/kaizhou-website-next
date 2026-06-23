@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { slugField } from "@/lib/slugField";
+import { ADMIN_DATE_FORMAT } from "@/lib/format";
 import { adminOrEditor, anyone } from "@/access";
 
 export const Activities: CollectionConfig = {
@@ -26,7 +27,7 @@ export const Activities: CollectionConfig = {
       type: "date",
       label: "活動日期",
       required: true,
-      admin: { position: "sidebar", date: { pickerAppearance: "dayAndTime" } },
+      admin: { position: "sidebar", date: { pickerAppearance: "dayAndTime", displayFormat: ADMIN_DATE_FORMAT } },
     },
     {
       name: "eventType",

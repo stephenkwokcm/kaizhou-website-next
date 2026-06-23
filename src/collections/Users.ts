@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { adminOnly, adminOrSelf, isAdminUser, isAdminOrEditorUser } from "@/access";
+import { SSO_ONLY } from "@/lib/sso";
 
 export const Users: CollectionConfig = {
   slug: "users",
@@ -11,6 +12,9 @@ export const Users: CollectionConfig = {
     hidden: ({ user }) => !isAdminUser(user),
   },
   auth: {
+    // Prod → SSO-only (no email/password, no fallback). Dev keeps email/password
+    // as a local bypass. See lib/sso (SSO_ONLY).
+    disableLocalStrategy: SSO_ONLY ? true : undefined,
     cookies: {
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",

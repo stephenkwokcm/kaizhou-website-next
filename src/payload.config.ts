@@ -12,6 +12,7 @@ import {
 import { en } from "@payloadcms/translations/languages/en";
 import { zhTw } from "@payloadcms/translations/languages/zhTw";
 
+import { ADMIN_DATE_FORMAT } from "./lib/format";
 import { Users } from "./collections/Users";
 import { Media } from "./collections/Media";
 import { News } from "./collections/News";
@@ -19,6 +20,7 @@ import { Activities } from "./collections/Activities";
 import { CommitteeMembers } from "./collections/CommitteeMembers";
 import { Enquiries } from "./collections/Enquiries";
 import { SiteSettings } from "./globals/SiteSettings";
+import { entraPlugin } from "./lib/sso-plugin";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -35,7 +37,23 @@ export default buildConfig({
   csrf: [process.env.NEXT_PUBLIC_SITE_URL].filter(Boolean) as string[],
   admin: {
     theme: "light",
+    // Payload's default ('MMMM do yyyy, h:mm a') renders an English-shaped pattern
+    // through the zh-TW locale → "六月 23日 2026, 3:39 上午". Use natural Chinese
+    // year→month→day order with 24h time so nothing reads as mixed-language.
+    dateFormat: ADMIN_DATE_FORMAT,
     user: Users.slug,
+    // Dev-only: auto-login the local admin for zero-friction work. Stands down
+    // when Entra creds are present (so you can exercise the SSO flow locally),
+    // and is always off outside `next dev` (build/start set production → prod
+    // stays SSO-only).
+    autoLogin:
+      process.env.NODE_ENV === "development" && !process.env.ENTRA_CLIENT_ID
+        ? {
+            email: process.env.DEV_ADMIN_EMAIL,
+            password: process.env.DEV_ADMIN_PASSWORD,
+            prefillOnly: false,
+          }
+        : false,
     // Use Payload's built-in default avatar instead of Gravatar (which renders
     // a broken image when the account has no Gravatar / is offline).
     avatar: "default",
@@ -83,6 +101,9 @@ export default buildConfig({
   // media/enquiries next, admin-only (Users) last.
   collections: [News, Activities, CommitteeMembers, Media, Enquiries, Users],
   globals: [SiteSettings],
+  // Microsoft Entra ID (Azure AD) SSO — active only when ENTRA_CLIENT_ID is set
+  // (production). Until then it's a no-op and email/password login is used.
+  plugins: [entraPlugin],
   secret: PAYLOAD_SECRET,
   // Reject uploads larger than 12MB (defense-in-depth alongside Media mimeTypes
   // allowlist) — generous enough for typical phone/camera photos, while still

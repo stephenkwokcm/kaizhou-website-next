@@ -69,6 +69,7 @@ export function ContactForm() {
         <input
           name="company"
           type="text"
+          aria-label="Company"
           tabIndex={-1}
           autoComplete="off"
         />

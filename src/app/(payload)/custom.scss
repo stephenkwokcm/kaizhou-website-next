@@ -4,13 +4,10 @@
 
 :root,
 [data-theme='light'] {
-  /* Primary/brand accent — Payload renders primary actions from the success ramp */
-  --theme-success-50: #f7ecec;
-  --theme-success-100: #ecd2d2;
-  --theme-success-400: #a23636;
-  --theme-success-500: #8b2323;
-  --theme-success-600: #6e1a1a;
-  --theme-success-700: #581515;
+  /* NOTE: do NOT remap --theme-success-* to brand red. Payload's primary
+     buttons come from the elevation ramp, not success — the success ramp only
+     drives success toasts/checkmarks, so reds there make "saved" messages read
+     as errors. Brand accent is applied directly as #8b2323 where wanted. */
 
   /* Warm paper surfaces */
   --theme-bg: #f5f0e8;
@@ -421,4 +418,128 @@ aside.nav {
 #nav-home { --nav-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>'); }
 @media (prefers-reduced-motion: reduce) {
   .nav .nav__link { transition: none; }
+}
+
+/* ===== Collection list view — table + controls =====
+   Payload's defaults are off-theme greys (#f5f5f5 search bar, #ddd pills,
+   #f5f5f5 zebra rows, #9a9a9a header labels) that float unstyled on the warm
+   page. These rules give the list the same bordered paper-card language as the
+   dashboard panels (.kz-dash__panel): card surface, warm header row, brand-red
+   title links, status badges. Selectors scope under .collection-list so they
+   outrank Payload's own .table/.row-N rules without !important. */
+
+/* Search + filter controls */
+.collection-list .search-bar {
+  background: #fffdf8;
+  border: 1px solid #e0d5bf;
+  border-radius: var(--style-radius-m);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.collection-list .search-bar:focus-within {
+  border-color: #8b2323;
+  box-shadow: 0 0 0 3px rgba(139, 35, 35, 0.12);
+}
+.collection-list .search-filter__input { color: #1a1a1a; }
+.collection-list .search-filter__input::placeholder { color: #a89a7f; }
+.collection-list .icon--search .stroke { stroke: #9a8f7b; }
+
+/* 欄 / 篩選條件 pills — match the dashboard's pill links (.kz-dash__link) */
+.collection-list .search-bar__actions .pill {
+  background: #fdf6ee;
+  border: 1px solid #e6d3be;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  color: #6e1a1a;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.collection-list .search-bar__actions .pill:hover {
+  background: #8b2323;
+  border-color: #8b2323;
+  color: #fff;
+}
+.collection-list .search-bar__actions .pill:hover .stroke { stroke: #fff; }
+
+/* Table as a paper card */
+.collection-list .table {
+  background: #fffefb;
+  border: 1px solid #ece3d2;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(70, 50, 25, 0.05), 0 4px 14px rgba(70, 50, 25, 0.045);
+  overflow: hidden; /* clip header band + row hover to the radius */
+}
+
+/* Header row */
+.collection-list thead th {
+  background: #faf4ea;
+  border-bottom: 1px solid #ece3d2;
+  padding: 0.85rem 1rem;
+  white-space: nowrap;
+}
+.collection-list .sort-column__label .field-label {
+  color: #4c4435;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.collection-list .sort-column__button .stroke { stroke: #b8aa8d; }
+.collection-list .sort-column__button:hover .stroke { stroke: #8b2323; }
+
+/* Body rows — drop the grey zebra for warm separators + warm hover */
+.collection-list tbody tr { background: transparent; }
+.collection-list tbody td {
+  padding: 0.72rem 1rem;
+  color: #3a342b;
+  border-top: 1px solid #f1e9da;
+}
+.collection-list tbody tr:first-child td { border-top: 0; }
+.collection-list tbody tr:hover td { background: #faf4ea; }
+
+/* Row links (the "use as title" cell varies by collection: title, name, …) in
+   brand red — field-name-agnostic so every list view is consistent */
+.collection-list tbody td a {
+  color: #8b2323;
+  font-weight: 500;
+  text-decoration: none;
+}
+.collection-list tbody td a:hover { text-decoration: underline; }
+
+/* Status select cell → a badge with a status dot */
+.collection-list .cell-status > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.12rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid #e3d4ba;
+  background: #f3ebdd;
+  color: #8a7256;
+}
+.collection-list .cell-status > span::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+.collection-list .cell-status .selected--published {
+  background: #eaf2e6;
+  border-color: #cfe2c8;
+  color: #3f6b3a;
+}
+
+/* Footer page controls */
+.collection-list .page-controls__page-info { color: #9a907d; font-size: 0.8rem; }
+.collection-list .per-page .popup-button {
+  border: 1px solid #e6d3be;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  background: #fdf6ee;
+  color: #6e1a1a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-list .search-bar,
+  .collection-list .search-bar__actions .pill { transition: none; }
 }

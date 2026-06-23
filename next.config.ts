@@ -16,6 +16,11 @@ const baselineHeaders = [
   },
 ];
 
+// In development, React/Next.js use eval() for Fast Refresh and debugging, so
+// the public CSP must allow 'unsafe-eval' under `next dev`. Production stays
+// strict — the public site never needs eval there.
+const isDev = process.env.NODE_ENV !== "production";
+
 // CSP for the public site (everything except /admin and /api).
 // NOTE: 'unsafe-inline' is required for script-src because Next.js streams
 // inline RSC/hydration bootstrap scripts (self.__next_f...) that carry no
@@ -29,7 +34,7 @@ const publicCsp = [
   "img-src 'self' data: blob:",
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "connect-src 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
@@ -78,6 +83,12 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // Next 16 blocks the image optimizer from fetching hosts that resolve to a
+    // private/loopback IP (SSRF guard), independent of remotePatterns. In dev,
+    // Payload serves media from http://localhost:3000 (→ 127.0.0.1), so allow
+    // local IPs for dev only; in production media is on the public domain and
+    // the guard stays on.
+    dangerouslyAllowLocalIP: isDev,
     remotePatterns: [
       {
         protocol: imgProtocol.replace(":", "") as "http" | "https",

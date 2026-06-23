@@ -1,0 +1,5 @@
+# Supply-chain hardening (pnpm 10.21+). See react-doctor: require-pnpm-hardening.
+# Delay installing freshly published versions so malware has time to be caught/unpublished.
+minimumReleaseAge: 10080 # minutes = 7 days
+# Fail the install if a package's trust signals (provenance/signatures) weaken between releases.
+trustPolicy: no-downgrade
