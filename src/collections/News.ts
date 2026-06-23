@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { slugify } from "@/lib/slugify";
+import { adminOrEditor, anyone } from "@/access";
 
 export const News: CollectionConfig = {
   slug: "news",
@@ -11,7 +12,12 @@ export const News: CollectionConfig = {
     listSearchableFields: ["title", "excerpt"],
     description: "管理網站的最新消息與公告。",
   },
-  access: { read: () => true },
+  access: {
+    read: anyone,
+    create: adminOrEditor,
+    update: adminOrEditor,
+    delete: adminOrEditor,
+  },
   fields: [
     { name: "title", type: "text", required: true, label: "標題" },
     {
@@ -66,7 +72,14 @@ export const News: CollectionConfig = {
       name: "content",
       type: "richText",
       label: "內文",
-      admin: { description: "文章正文。用上方工具列設定標題、粗體、清單、插入圖片。" },
+      admin: {
+        description: "文章正文。用上方工具列設定標題、粗體、清單、插入圖片。",
+        components: {
+          beforeInput: [
+            { path: "/components/admin/ContentStarter", clientProps: { target: "content" } },
+          ],
+        },
+      },
     },
   ],
 };

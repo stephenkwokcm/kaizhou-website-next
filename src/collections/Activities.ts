@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { slugify } from "@/lib/slugify";
+import { adminOrEditor, anyone } from "@/access";
 
 export const Activities: CollectionConfig = {
   slug: "activities",
@@ -11,7 +12,12 @@ export const Activities: CollectionConfig = {
     listSearchableFields: ["title", "location"],
     description: "管理活動預告與活動回顧。",
   },
-  access: { read: () => true },
+  access: {
+    read: anyone,
+    create: adminOrEditor,
+    update: adminOrEditor,
+    delete: adminOrEditor,
+  },
   fields: [
     { name: "title", type: "text", required: true, label: "標題" },
     {
@@ -66,7 +72,14 @@ export const Activities: CollectionConfig = {
       name: "description",
       type: "richText",
       label: "活動內容",
-      admin: { description: "詳述活動內容、流程、參加者等。" },
+      admin: {
+        description: "詳述活動內容、流程、參加者等。",
+        components: {
+          beforeInput: [
+            { path: "/components/admin/ContentStarter", clientProps: { target: "description" } },
+          ],
+        },
+      },
     },
     {
       name: "gallery",

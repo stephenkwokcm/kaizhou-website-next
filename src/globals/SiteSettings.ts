@@ -1,10 +1,18 @@
 import type { GlobalConfig } from "payload";
+import { adminOnly, anyone, isAdminUser } from "@/access";
 
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "網站設定",
-  admin: { group: "系統" },
-  access: { read: () => true },
+  admin: {
+    group: "系統設定",
+    // Editors can't edit settings — hide from their nav (frontend still reads it).
+    hidden: ({ user }) => !isAdminUser(user),
+  },
+  access: {
+    read: anyone,
+    update: adminOnly,
+  },
   fields: [
     { name: "siteName", type: "text", label: "網站名稱", defaultValue: "香港開州同鄉會" },
     { name: "logo", type: "upload", relationTo: "media", label: "標誌", admin: { description: "SVG 或 PNG，建議 200×200 或以上。" } },

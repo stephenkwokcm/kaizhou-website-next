@@ -36,6 +36,9 @@ export default buildConfig({
   admin: {
     theme: "light",
     user: Users.slug,
+    // Use Payload's built-in default avatar instead of Gravatar (which renders
+    // a broken image when the account has no Gravatar / is offline).
+    avatar: "default",
     meta: {
       titleSuffix: " — 香港開州同鄉會",
       description: "香港開州同鄉會內容管理系統",
@@ -46,22 +49,10 @@ export default buildConfig({
         Icon: "/components/admin/Icon",
       },
       beforeLogin: ["/components/admin/BeforeLogin"],
+      beforeNavLinks: ["/components/admin/NavHome"],
       views: {
         dashboard: { Component: "/components/admin/Dashboard" },
       },
-    },
-    livePreview: {
-      url: ({ data, collectionConfig }) => {
-        const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-        const segment = collectionConfig?.slug === "activities" ? "activities" : "news";
-        return `${base}/${segment}/${encodeURIComponent(String(data?.slug ?? ""))}`;
-      },
-      collections: ["news", "activities"],
-      breakpoints: [
-        { label: "手機", name: "mobile", width: 390, height: 844 },
-        { label: "平板", name: "tablet", width: 768, height: 1024 },
-        { label: "桌面", name: "desktop", width: 1440, height: 900 },
-      ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -88,15 +79,20 @@ export default buildConfig({
     supportedLanguages: { "zh-TW": zhTw, en },
     fallbackLanguage: "zh-TW",
   },
-  collections: [Users, Media, News, Activities, CommitteeMembers, Enquiries],
+  // Order drives the admin nav: content first (the editor's daily work),
+  // media/enquiries next, admin-only (Users) last.
+  collections: [News, Activities, CommitteeMembers, Media, Enquiries, Users],
   globals: [SiteSettings],
   secret: PAYLOAD_SECRET,
-  // Reject uploads larger than 5MB (defense-in-depth alongside Media mimeTypes allowlist).
+  // Reject uploads larger than 12MB (defense-in-depth alongside Media mimeTypes
+  // allowlist) — generous enough for typical phone/camera photos, while still
+  // bounded. Must stay BELOW next.config's serverActions.bodySizeLimit (20MB)
+  // so the Next Server Action doesn't reject the upload before Payload can.
   // abortOnLimit makes the server reject oversized files (HTTP 413) instead of
   // silently truncating them.
   upload: {
     limits: {
-      fileSize: 5_000_000,
+      fileSize: 12_000_000,
     },
     abortOnLimit: true,
   },

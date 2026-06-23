@@ -1,14 +1,14 @@
 import type { CollectionConfig } from "payload";
-
-const isAdmin = (user: { roles?: string[] | null } | null | undefined): boolean =>
-  Boolean(user?.roles?.includes("admin"));
+import { adminOnly, adminOrSelf, isAdminUser, isAdminOrEditorUser } from "@/access";
 
 export const Users: CollectionConfig = {
   slug: "users",
   labels: { singular: "使用者", plural: "使用者" },
   admin: {
-    group: "系統",
+    group: "管理員專用",
     useAsTitle: "email",
+    // Account management is admin-only — hide this collection from editors' nav.
+    hidden: ({ user }) => !isAdminUser(user),
   },
   auth: {
     cookies: {
@@ -17,12 +17,14 @@ export const Users: CollectionConfig = {
     },
   },
   access: {
-    // Who can enter /admin
-    admin: ({ req: { user } }) => isAdmin(user),
-    create: ({ req: { user } }) => isAdmin(user),
-    read: ({ req: { user } }) => isAdmin(user),
-    update: ({ req: { user } }) => isAdmin(user),
-    delete: ({ req: { user } }) => isAdmin(user),
+    // Editors may enter /admin (to manage content); account management stays
+    // admin-only. Editors are scoped to their own account so the profile view
+    // works, but they can never read or edit other users.
+    admin: ({ req: { user } }) => isAdminOrEditorUser(user),
+    create: adminOnly,
+    read: adminOrSelf,
+    update: adminOrSelf,
+    delete: adminOnly,
   },
   fields: [
     { name: "name", type: "text", label: "姓名" },
@@ -42,8 +44,8 @@ export const Users: CollectionConfig = {
       access: {
         // Only an admin can set or change roles (prevents self-elevation,
         // including at creation time if collection-create is ever loosened).
-        create: ({ req: { user } }) => isAdmin(user),
-        update: ({ req: { user } }) => isAdmin(user),
+        create: ({ req: { user } }) => isAdminUser(user),
+        update: ({ req: { user } }) => isAdminUser(user),
       },
     },
   ],

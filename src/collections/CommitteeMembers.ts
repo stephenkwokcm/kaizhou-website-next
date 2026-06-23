@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOrEditor, anyone } from "@/access";
 
 export const CommitteeMembers: CollectionConfig = {
   slug: "committee-members",
@@ -10,7 +11,12 @@ export const CommitteeMembers: CollectionConfig = {
     listSearchableFields: ["name", "title"],
     description: "管理理事會成員名錄。",
   },
-  access: { read: () => true },
+  access: {
+    read: anyone,
+    create: adminOrEditor,
+    update: adminOrEditor,
+    delete: adminOrEditor,
+  },
   defaultSort: "order",
   fields: [
     { name: "name", type: "text", required: true, label: "姓名" },

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly, adminOrEditor } from "@/access";
 
 export const Enquiries: CollectionConfig = {
   slug: "enquiries",
@@ -14,9 +15,9 @@ export const Enquiries: CollectionConfig = {
     // access), so blocking create here only removes the admin "Create" button
     // and the public REST create — the contact form keeps working.
     create: () => false,
-    read: ({ req }) => Boolean(req.user),
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
+    read: adminOrEditor,
+    update: adminOrEditor,
+    delete: adminOnly,
   },
   fields: [
     { name: "name", type: "text", required: true, label: "姓名" },

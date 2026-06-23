@@ -68,6 +68,15 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Remove the X-Powered-By: Next.js fingerprinting header.
   poweredByHeader: false,
+  // Payload's admin uploads inline editor images through a Next.js Server
+  // Action, whose request body defaults to a 1MB cap — far too small for
+  // modern photos, and it fails before Payload's own file-size check. Raise it
+  // above the Payload upload limit so normal-sized images go through.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
+  },
   images: {
     remotePatterns: [
       {

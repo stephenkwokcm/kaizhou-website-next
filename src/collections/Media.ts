@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOrEditor, anyone } from "@/access";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -8,7 +9,12 @@ export const Media: CollectionConfig = {
     useAsTitle: "title",
     description: "網站所有圖片集中於此管理。",
   },
-  access: { read: () => true },
+  access: {
+    read: anyone,
+    create: adminOrEditor,
+    update: adminOrEditor,
+    delete: adminOrEditor,
+  },
   upload: {
     staticDir: "media",
     imageSizes: [
