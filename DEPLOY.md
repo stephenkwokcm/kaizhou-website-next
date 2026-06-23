@@ -52,13 +52,17 @@ sudo /usr/local/bin/docker compose up -d --build
 # production (it expects migrations in prod), so this one-off runs with
 # NODE_ENV=development against the production DB purely to create the schema.
 # The running app stays NODE_ENV=production. Re-run after collection changes.
+# --env-file .env is REQUIRED: it carries ENTRA_* so the OAuth plugin is enabled
+# during the push and its injected `sub` field (users.sub, indexed) gets created.
+# Without it the prod app crashes every user query with "column users.sub does
+# not exist". (The same applies to any plugin that adds fields when enabled.)
 source .env
 sudo /usr/local/bin/docker build --target builder -t kaizhou-builder \
   --build-arg NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL" .
 sudo /usr/local/bin/docker run --rm --network kaizhou_default \
+  --env-file .env \
   -e NODE_ENV=development -e PAYLOAD_DB_PUSH=true \
   -e DATABASE_URL="postgres://kaizhou:${POSTGRES_PASSWORD}@db:5432/kaizhou" \
-  -e PAYLOAD_SECRET="$PAYLOAD_SECRET" -e NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL" \
   kaizhou-builder pnpm payload run scripts/db-push.ts
 
 # 5. Smoke-test locally on the NAS
@@ -92,6 +96,11 @@ cd /volume1/docker/kaizhou-website
 git pull
 sudo /usr/local/bin/docker compose up -d --build
 ```
+
+If the update changed collections/fields **or enabled a plugin that adds fields**
+(e.g. turning on Entra SSO adds `users.sub`), re-run the schema sync in step 4
+afterwards — `compose up` does not migrate the DB. Symptom of a skipped sync:
+the app boots but every query errors with `column ... does not exist`.
 
 ## Backups
 
