@@ -29,10 +29,17 @@ git clone https://github.com/stephenkwokcm/kaizhou-website-next.git /volume1/doc
 cd /volume1/docker/kaizhou-website
 
 # 2. Create .env with production secrets (NOT committed; chmod 600)
+# The ENTRA_* values come from the Microsoft Entra app registration (Azure portal)
+# and are REQUIRED: prod is SSO-only (disableLocalStrategy), so without them the
+# admin panel has no way to log in. Also register the redirect URI in that app:
+#   https://kaizhou.hk/api/users/oauth/entra/callback
 cat > .env <<EOF
 NEXT_PUBLIC_SITE_URL=https://kaizhou.hk
 PAYLOAD_SECRET=$(openssl rand -hex 32)
 POSTGRES_PASSWORD=$(openssl rand -hex 24)
+ENTRA_TENANT_ID=<tenant-id>
+ENTRA_CLIENT_ID=<client-id>
+ENTRA_CLIENT_SECRET=<client-secret>
 EOF
 chmod 600 .env
 
