@@ -3,3 +3,8 @@
 minimumReleaseAge: 10080 # minutes = 7 days
 # Fail the install if a package's trust signals (provenance/signatures) weaken between releases.
 trustPolicy: no-downgrade
+# Only enforce that on recent publishes. A takeover is always a *fresh* publish, so it lands at
+# age ~0 and is still checked. Versions this old that no-downgrade flags are pre-provenance-era
+# or old-branch backports (e.g. semver@6.3.1, 2023, official maintainer; the whole 3.x line of
+# eslint-import-resolver-typescript) — long-established, never pulled, and not incident signal.
+trustPolicyIgnoreAfter: 129600 # minutes = 90 days
