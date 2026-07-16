@@ -25,17 +25,21 @@ export const CommitteeMembers: CollectionConfig = {
       type: "select",
       label: "職銜",
       admin: { description: "從清單選擇職銜。" },
-      // Values == labels (Chinese). This set is a SUPERSET of every 職銜
-      // already in the DB (incl. 創會會長 / 財務長) so the text→enum schema
-      // push converts cleanly. Add any new title here BEFORE assigning it.
+      // Values == labels (Chinese). This set MUST be a superset of every 職銜
+      // in every environment (prod incl. 常務副會長 / 司庫) so the text→enum
+      // schema push converts cleanly. A value not listed here renders as a
+      // BLANK cell in the admin list and fails save validation — so add any
+      // new title here BEFORE assigning it to anyone.
       options: [
         { label: "創會會長", value: "創會會長" },
         { label: "會長", value: "會長" },
+        { label: "常務副會長", value: "常務副會長" },
         { label: "副會長", value: "副會長" },
         { label: "秘書長", value: "秘書長" },
         { label: "副秘書長", value: "副秘書長" },
         { label: "財務長", value: "財務長" },
         { label: "財務", value: "財務" },
+        { label: "司庫", value: "司庫" },
         { label: "常務理事", value: "常務理事" },
         { label: "理事", value: "理事" },
         { label: "監事", value: "監事" },
