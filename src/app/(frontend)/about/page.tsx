@@ -5,10 +5,11 @@ import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
 import { SectionTitle } from "@/components/shared/SectionTitle";
 import { InkDivider } from "@/components/shared/InkDivider";
 import { safePayloadQuery } from "@/lib/payload";
-import { pickImage, type ImageData } from "@/lib/media";
+import { pickImage } from "@/lib/media";
 import { pageMetadata } from "@/lib/seo";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { CommitteeRoster } from "@/components/sections/about/CommitteeRoster";
+import { CommitteeRoster, type CommitteeMember } from "@/components/sections/about/CommitteeRoster";
+import { HonoraryBoard, type HonoraryPresident } from "@/components/sections/about/HonoraryBoard";
 
 export const metadata: Metadata = pageMetadata(
   "關於我們",
@@ -16,30 +17,38 @@ export const metadata: Metadata = pageMetadata(
   "/about",
 );
 
-type Member = {
-  id: string | number;
-  name: string;
-  title?: string;
-  bio?: string;
-  photo?: ImageData | null;
-};
-
 export default async function AboutPage() {
-  const committee = await safePayloadQuery<Member[]>(async (payload) => {
-    const res = await payload.find({
-      collection: "committee-members",
-      limit: 24,
-      sort: "order",
-      where: { isCurrent: { equals: true } },
-    });
-    return res.docs.map((doc) => ({
-      id: doc.id,
-      name: doc.name,
-      title: doc.title ?? undefined,
-      bio: doc.bio ?? undefined,
-      photo: pickImage(doc.photo, "thumbnail"),
-    }));
-  }, []);
+  const [committee, honorary] = await Promise.all([
+    safePayloadQuery<CommitteeMember[]>(async (payload) => {
+      const res = await payload.find({
+        collection: "committee-members",
+        limit: 24,
+        sort: "order",
+        where: { isCurrent: { equals: true } },
+      });
+      return res.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.name,
+        title: doc.title ?? undefined,
+        bio: doc.bio ?? undefined,
+        photo: pickImage(doc.photo, "thumbnail"),
+      }));
+    }, []),
+    safePayloadQuery<HonoraryPresident[]>(async (payload) => {
+      const res = await payload.find({
+        collection: "honorary-presidents",
+        limit: 24,
+        sort: "order",
+        where: { isCurrent: { equals: true } },
+      });
+      return res.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.name,
+        title: doc.title ?? undefined,
+        photo: pickImage(doc.photo, "thumbnail"),
+      }));
+    }, []),
+  ]);
 
   return (
     <article className="pt-32 pb-16">
@@ -118,6 +127,19 @@ export default async function AboutPage() {
           <CommitteeRoster members={committee} />
         )}
       </section>
+
+      {/* Honorary presidents — hidden until the first one is invited. */}
+      {honorary.length > 0 && (
+        <>
+          <InkDivider />
+          <section className="container-page">
+            <RevealOnScroll>
+              <SectionTitle zh="榮譽會長" en="Honorary Presidents" seal="榮譽" />
+            </RevealOnScroll>
+            <HonoraryBoard members={honorary} />
+          </section>
+        </>
+      )}
 
       <InkDivider />
 

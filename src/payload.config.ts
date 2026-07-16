@@ -18,6 +18,7 @@ import { Media } from "./collections/Media";
 import { News } from "./collections/News";
 import { Activities } from "./collections/Activities";
 import { CommitteeMembers } from "./collections/CommitteeMembers";
+import { HonoraryPresidents } from "./collections/HonoraryPresidents";
 import { Enquiries } from "./collections/Enquiries";
 import { SiteSettings } from "./globals/SiteSettings";
 import { entraPlugin } from "./lib/sso-plugin";
@@ -99,7 +100,7 @@ export default buildConfig({
   },
   // Order drives the admin nav: content first (the editor's daily work),
   // media/enquiries next, admin-only (Users) last.
-  collections: [News, Activities, CommitteeMembers, Media, Enquiries, Users],
+  collections: [News, Activities, CommitteeMembers, HonoraryPresidents, Media, Enquiries, Users],
   globals: [SiteSettings],
   // Microsoft Entra ID (Azure AD) SSO — active only when ENTRA_CLIENT_ID is set
   // (production). Until then it's a no-op and email/password login is used.
