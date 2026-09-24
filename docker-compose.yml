@@ -11,11 +11,8 @@ services:
       POSTGRES_DB: kaizhou
     volumes:
       - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kaizhou -d kaizhou"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # No healthcheck: polling pg_isready every 10s kept the NAS disks awake (audible
+    # noise). The app waits on service_started instead (fine in practice on the NAS).
     # No host port published — only reachable by the app over the internal network.
 
   app:
@@ -29,7 +26,7 @@ services:
     restart: unless-stopped
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_started
     environment:
       NODE_ENV: production
       PORT: "3000"
