@@ -18,7 +18,7 @@
     "@payloadcms/live-preview-react": "3.89.0",
     "@payloadcms/next": "3.89.0",
     "@payloadcms/richtext-lexical": "3.89.0",
-    "@payloadcms/translations": "3.89.0",
+    "@payloadcms/translations": "3.90.2",
     "@payloadcms/ui": "3.89.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
