@@ -85,15 +85,16 @@ export async function Footer() {
                 </Link>
               ))}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               {settings.wechatQR ? (
-                <div className="relative w-20 aspect-square overflow-hidden rounded-sm bg-paper">
+                <div className="relative w-32 shrink-0 aspect-square overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-white/15">
                   <Image
                     src={settings.wechatQR.url}
-                    alt={settings.wechatQR.alt ?? "WeChat QR"}
+                    alt={settings.wechatQR.alt ?? "香港開州同鄉會微信公眾號二維碼"}
                     fill
-                    sizes="80px"
-                    className="object-cover"
+                    unoptimized
+                    sizes="128px"
+                    className="object-contain p-2"
                   />
                 </div>
               ) : (

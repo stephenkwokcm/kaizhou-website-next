@@ -56,13 +56,14 @@ export default async function ContactPage() {
                 <div>
                   <p className="font-sans-zh text-xs tracking-widest text-stone mb-3">微信公眾號</p>
                   {settings.wechatQR ? (
-                    <div className="relative w-32 aspect-square overflow-hidden rounded-sm border border-stone/20">
+                    <div className="relative w-32 aspect-square overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-stone/20">
                       <Image
                         src={settings.wechatQR.url}
-                        alt={settings.wechatQR.alt ?? "WeChat QR"}
+                        alt={settings.wechatQR.alt ?? "香港開州同鄉會微信公眾號二維碼"}
                         fill
+                        unoptimized
                         sizes="128px"
-                        className="object-cover"
+                        className="object-contain p-2"
                       />
                     </div>
                   ) : (

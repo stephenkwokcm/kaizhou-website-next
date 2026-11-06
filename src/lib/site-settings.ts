@@ -45,7 +45,7 @@ export const getSiteSettings = cache(async (): Promise<SiteInfo> => {
       fax: s.contactInfo?.fax || null,
       email: s.contactInfo?.email || null,
       officeHours: s.contactInfo?.officeHours || null,
-      wechatQR: pickImage(s.contactInfo?.wechatQR, "thumbnail"),
+      wechatQR: pickImage(s.contactInfo?.wechatQR),
       logo: pickImage(s.logo, "thumbnail"),
       socialLinks: (s.socialLinks ?? []).map(({ platform, url }) => ({ platform, url })),
       footerText: s.footerText ?? null,
