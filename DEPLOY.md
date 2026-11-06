@@ -55,7 +55,7 @@ From the **local checkout**, build and install the runtime configuration:
 # 3. Build from committed source and start the runtime image.
 git archive HEAD | ssh nas 'sudo /usr/local/bin/docker build \
   --build-arg NEXT_PUBLIC_SITE_URL=https://kaizhou.hk -t kaizhou-app:latest -'
-scp docker-compose.yml nas:/volume1/docker/kaizhou-website/docker-compose.yml
+ssh nas 'cat > /volume1/docker/kaizhou-website/docker-compose.yml' < docker-compose.yml
 ssh nas 'cd /volume1/docker/kaizhou-website && sudo /usr/local/bin/docker compose up -d --no-build'
 
 # Only when schema changes require it, build a temporary full builder image.
@@ -118,7 +118,7 @@ Run from the local checkout after committing, pushing, and passing checks:
 release=$(git rev-parse --short HEAD)
 git archive HEAD | ssh nas "sudo /usr/local/bin/docker build \
   --build-arg NEXT_PUBLIC_SITE_URL=https://kaizhou.hk -t kaizhou-app:$release -"
-scp docker-compose.yml nas:/volume1/docker/kaizhou-website/docker-compose.yml
+ssh nas 'cat > /volume1/docker/kaizhou-website/docker-compose.yml' < docker-compose.yml
 ssh nas "cd /volume1/docker/kaizhou-website && \
   sudo /usr/local/bin/docker tag kaizhou-app:latest kaizhou-app:rollback && \
   sudo /usr/local/bin/docker tag kaizhou-app:$release kaizhou-app:latest && \
