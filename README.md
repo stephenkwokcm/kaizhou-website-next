@@ -4,13 +4,15 @@ Bilingual (zh-Hant / en) Next.js 16 + Payload CMS 3 website for the 香港開州
 
 ## Stack
 
-- **Next.js 16.2.9** (App Router, Turbopack)
-- **Payload CMS 3.85** with PostgreSQL (Supabase) adapter
+- **Next.js 16.4.3** (App Router, Turbopack)
+- **Payload CMS 3.92.1** with PostgreSQL adapter
 - **Tailwind CSS 4** (CSS-first `@theme` config)
 - **Framer Motion** for parallax + scroll-triggered reveals
 - Fonts: `Noto Serif TC` (body), `Ma Shan Zheng` (calligraphy), `Noto Sans TC` (UI)
 
 ## Getting started
+
+Use Node.js 22.23.4+ (22.x) or 24.22.1+ (24.x). Docker pins Node.js 22.23.4.
 
 ```bash
 pnpm install
@@ -74,7 +76,14 @@ can be bypassed.
 - **RBAC** on `users` with self-elevation blocked; **SVG uploads blocked** + 5 MB
   upload cap; **rich-text link hrefs sanitized** against `javascript:`/`data:`.
 - **Secure auth cookies** in production; CORS/CSRF locked to `NEXT_PUBLIC_SITE_URL`.
-- `pnpm audit` is clean (transitive advisories pinned via `pnpm.overrides`).
+- Run `pnpm run audit` to verify the dependency security patch and audit all packages.
+  Transitive fixes are pinned via `pnpm.overrides`. `deepmerge@4.3.1` has no
+  upstream fix for [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4),
+  so `patches/deepmerge@4.3.1.patch` filters prototype-related keys from both
+  merge inputs, including nested objects, in the source and both shipped builds.
+  Only that locally fixed advisory is excluded from the version-based audit;
+  `scripts/dependency-security.test.mjs` checks the installed dependency used by
+  Payload. Remove the patch and exception when an upstream fix becomes available.
 
 > **Email is intentionally not configured** (no SMTP available). `payload.config.ts`
 > has no `email` adapter, so the admin **"Forgot password" link won't deliver an
