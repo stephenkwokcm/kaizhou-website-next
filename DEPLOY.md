@@ -16,16 +16,20 @@ Tunnel** at `https://kaizhou.hk`.
 | Volumes | `kaizhou_db_data` (Postgres), `kaizhou_media` (uploads) — named volumes |
 | Public URL | `https://kaizhou.hk` via the existing `cloudflared-tunnel` |
 
+The NAS project directory contains only `docker-compose.yml`, `.env`, and
+intentional recovery backups. Source, documentation, and verification scripts
+stay in the local checkout and Git remote. Stream committed source directly to
+Docker for builds; do not unpack a checkout or retain a source archive on the NAS.
+
 `docker` is not on the SSH PATH; use `sudo /usr/local/bin/docker` (passwordless
 sudo is configured).
 
 ## First deploy
 
 ```sh
-# 1. Clone (repo is public)
+# 1. On the NAS, create the runtime directory.
 sudo mkdir -p /volume1/docker/kaizhou-website
 sudo chown "$(id -u):$(id -g)" /volume1/docker/kaizhou-website
-git clone https://github.com/stephenkwokcm/kaizhou-website-next.git /volume1/docker/kaizhou-website
 cd /volume1/docker/kaizhou-website
 
 # 2. Create .env with production secrets (NOT committed; chmod 600)
@@ -43,8 +47,26 @@ ENTRA_CLIENT_SECRET=<client-secret>
 EOF
 chmod 600 .env
 
-# 3. Build + start
-sudo /usr/local/bin/docker compose up -d --build
+```
+
+From the **local checkout**, build and install the runtime configuration:
+
+```sh
+# 3. Build from committed source and start the runtime image.
+git archive HEAD | ssh nas 'sudo /usr/local/bin/docker build \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://kaizhou.hk -t kaizhou-app:latest -'
+scp docker-compose.yml nas:/volume1/docker/kaizhou-website/docker-compose.yml
+ssh nas 'cd /volume1/docker/kaizhou-website && sudo /usr/local/bin/docker compose up -d --no-build'
+
+# Only when schema changes require it, build a temporary full builder image.
+git archive HEAD | ssh nas 'sudo /usr/local/bin/docker build --target builder \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://kaizhou.hk -t kaizhou-builder -'
+```
+
+On the NAS, for an initial database or a release requiring schema changes:
+
+```sh
+cd /volume1/docker/kaizhou-website
 
 # 4. Create the database schema (one-off).
 # The runtime image is trimmed and has no drizzle-kit, so the schema is synced
@@ -57,13 +79,12 @@ sudo /usr/local/bin/docker compose up -d --build
 # Without it the prod app crashes every user query with "column users.sub does
 # not exist". (The same applies to any plugin that adds fields when enabled.)
 source .env
-sudo /usr/local/bin/docker build --target builder -t kaizhou-builder \
-  --build-arg NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL" .
 sudo /usr/local/bin/docker run --rm --network kaizhou_default \
   --env-file .env \
   -e NODE_ENV=development -e PAYLOAD_DB_PUSH=true \
   -e DATABASE_URL="postgres://kaizhou:${POSTGRES_PASSWORD}@db:5432/kaizhou" \
   kaizhou-builder pnpm payload run scripts/db-push.ts
+sudo /usr/local/bin/docker image rm kaizhou-builder
 
 # 5. Smoke-test locally on the NAS
 curl -I http://localhost:3100
@@ -91,11 +112,24 @@ role automatically — no role back-fill needed):
 
 ## Updating
 
+Run from the local checkout after committing, pushing, and passing checks:
+
 ```sh
-cd /volume1/docker/kaizhou-website
-git pull
-sudo /usr/local/bin/docker compose up -d --build
+release=$(git rev-parse --short HEAD)
+git archive HEAD | ssh nas "sudo /usr/local/bin/docker build \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://kaizhou.hk -t kaizhou-app:$release -"
+scp docker-compose.yml nas:/volume1/docker/kaizhou-website/docker-compose.yml
+ssh nas "cd /volume1/docker/kaizhou-website && \
+  sudo /usr/local/bin/docker tag kaizhou-app:latest kaizhou-app:rollback && \
+  sudo /usr/local/bin/docker tag kaizhou-app:$release kaizhou-app:latest && \
+  sudo /usr/local/bin/docker compose up -d --no-deps --no-build app"
 ```
+
+Verify the new image on a private port before switching, then smoke-test the
+public pages, content APIs, media, and admin login. Remove temporary containers,
+secret files, and this build's unused builder/dependency images once no container
+uses them. Keep the deployed image and intentional rollback images. Do not use
+global prune commands on this shared Docker host.
 
 If the update changed collections/fields **or enabled a plugin that adds fields**
 (e.g. turning on Entra SSO adds `users.sub`), re-run the schema sync in step 4
