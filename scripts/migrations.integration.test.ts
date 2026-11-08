@@ -25,6 +25,11 @@ try {
   ] } });
   // Previous pushes may have left password fields. Baselining must preserve them.
   await payload.db.pool.query("ALTER TABLE users ADD COLUMN hash varchar");
+  await payload.db.pool.query("CREATE TABLE users_sessions (id varchar PRIMARY KEY)");
+  await payload.db.pool.query("INSERT INTO users_sessions VALUES ('preserve-legacy-session')");
+  await payload.db.pool.query("CREATE TABLE unexpected_table (id integer)");
+  await assert.rejects(baselineDatabase(payload, true), /Unexpected table: unexpected_table/);
+  await payload.db.pool.query("DROP TABLE unexpected_table");
   assert.match(await baselineDatabase(payload, false), /matches/);
   assert.equal((await payload.find({ collection: "payload-migrations" })).docs[0].name, "dev");
   await payload.db.pool.query("DROP INDEX users_email_idx");
@@ -36,6 +41,7 @@ try {
   await payload.db.pool.query("ALTER TABLE honorary_presidents RENAME COLUMN wrong_title TO title");
   assert.match(await baselineDatabase(payload, true), /verified and recorded/);
   assert.match(await baselineDatabase(payload, true), /already recorded/);
+  assert.equal((await payload.db.pool.query("SELECT id FROM users_sessions")).rows[0].id, "preserve-legacy-session");
   await payload.db.migrate();
   await payload.db.migrateDown();
   await payload.db.migrate();

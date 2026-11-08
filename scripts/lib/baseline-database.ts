@@ -3,7 +3,7 @@ import snapshot from "../../src/migrations/20261108_091832_baseline.json";
 
 const baselineName = "20261108_091832_baseline";
 
-// Compare required schema objects; old password columns may remain from dev-mode pushes.
+// Preserve old local-auth columns and sessions; production SSO does not use them.
 export async function baselineDatabase(payload: Payload, apply: boolean) {
   const client = await payload.db.pool.connect();
   try {
@@ -53,7 +53,7 @@ export async function baselineDatabase(payload: Payload, apply: boolean) {
     const differences: string[] = [];
     const expectedTables = new Set(Object.values(snapshot.tables).map((table) => table.name));
     for (const table of new Set(columns.map((column) => column.table_name))) {
-      if (!expectedTables.has(table)) differences.push(`Unexpected table: ${table}`);
+      if (!expectedTables.has(table) && table !== "users_sessions") differences.push(`Unexpected table: ${table}`);
     }
     for (const table of Object.values(snapshot.tables)) {
       for (const column of Object.values(table.columns)) {

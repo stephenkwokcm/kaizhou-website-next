@@ -150,7 +150,7 @@ pnpm db:status
 The baseline represents commit `3b4057e` with production SSO enabled. Adoption checks
 required tables, column types/nullability/defaults, enums, indexes and foreign keys.
 It refuses schema drift and unexpected migration history. Extra legacy password columns
-are retained. Only after verification does `apply` replace the old `dev` marker with
+and the unused local-auth `users_sessions` table are retained. Only after verification does `apply` replace the old `dev` marker with
 the baseline record, in a transaction; it does not rewrite application data. Never
 manually mark the baseline as applied on a mismatched database. Reconcile differences
 against the backup in a disposable database first. A previously recorded baseline is
