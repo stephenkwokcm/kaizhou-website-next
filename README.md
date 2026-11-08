@@ -12,7 +12,7 @@ Bilingual (zh-Hant / en) Next.js 16 + Payload CMS 3 website for the 香港開州
 
 ## Getting started
 
-Use Node.js 22.23.4+ (22.x) or 24.22.1+ (24.x). Docker pins Node.js 22.23.4.
+Use Node.js 24.22.2+ (24.x). `.node-version` and Docker pin 24.22.2.
 
 ```bash
 pnpm install

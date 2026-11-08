@@ -23,11 +23,8 @@ async function migrate() {
       return;
     }
   }
-  const [committee, honorary] = await Promise.all([
-    payload.find({ collection: "committee-members", pagination: false, depth: 0, sort: ["order", "id"] }),
-    payload.find({ collection: "honorary-presidents", pagination: false, depth: 0, sort: ["order", "id"] }),
-  ]);
-  const roles = migrateRoleAssignments(committee.docs, honorary.docs, mapping);
+  const committee = await payload.find({ collection: "committee-members", pagination: false, depth: 0, sort: ["order", "id"] });
+  const roles = migrateRoleAssignments(committee.docs, mapping);
   for (const role of roles) payload.logger.info(`${role.name}: ${role.members?.length ?? 0} members`);
   if (mode === "apply") {
     const transactionID = await payload.db.beginTransaction();

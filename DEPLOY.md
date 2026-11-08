@@ -52,11 +52,11 @@ chmod 600 .env
 From the **local checkout**, build and install the runtime configuration:
 
 ```sh
-# 3. Build from committed source and start the runtime image.
+# 3. Build from committed source and start the database.
 git archive HEAD | ssh nas 'sudo /usr/local/bin/docker build \
   --build-arg NEXT_PUBLIC_SITE_URL=https://kaizhou.hk -t kaizhou-app:latest -'
 ssh nas 'cat > /volume1/docker/kaizhou-website/docker-compose.yml' < docker-compose.yml
-ssh nas 'cd /volume1/docker/kaizhou-website && sudo /usr/local/bin/docker compose up -d --no-build'
+ssh nas 'cd /volume1/docker/kaizhou-website && sudo /usr/local/bin/docker compose up -d db'
 
 # Only when schema changes require it, build a temporary full builder image.
 git archive HEAD | ssh nas 'sudo /usr/local/bin/docker build --target builder \
@@ -68,25 +68,18 @@ On the NAS, for an initial database or a release requiring schema changes:
 ```sh
 cd /volume1/docker/kaizhou-website
 
-# 4. Create the database schema (one-off).
-# The runtime image is trimmed and has no drizzle-kit, so the schema is synced
-# from the full build image. NOTE: Payload only applies `push` when NOT in
-# production (it expects migrations in prod), so this one-off runs with
-# NODE_ENV=development against the production DB purely to create the schema.
-# The running app stays NODE_ENV=production. Re-run after collection changes.
-# --env-file .env is REQUIRED: it carries ENTRA_* so the OAuth plugin is enabled
-# during the push and its injected `sub` field (users.sub, indexed) gets created.
-# Without it the prod app crashes every user query with "column users.sub does
-# not exist". (The same applies to any plugin that adds fields when enabled.)
+# 4. Apply reviewed, versioned migrations before starting the new runtime.
+# For an existing push-managed DB, complete the baseline procedure below first.
+# Keep ENTRA_* enabled so migration tooling uses the production SSO configuration.
 source .env
 sudo /usr/local/bin/docker run --rm --network kaizhou_default \
-  --env-file .env \
-  -e NODE_ENV=development -e PAYLOAD_DB_PUSH=true \
+  --env-file .env -e NODE_ENV=production \
   -e DATABASE_URL="postgres://kaizhou:${POSTGRES_PASSWORD}@db:5432/kaizhou" \
-  kaizhou-builder pnpm payload run scripts/db-push.ts
+  kaizhou-builder pnpm db:migrate
 sudo /usr/local/bin/docker image rm kaizhou-builder
 
-# 5. Smoke-test locally on the NAS
+# 5. Start the runtime and smoke-test locally on the NAS
+sudo /usr/local/bin/docker compose up -d --no-deps --no-build app
 curl -I http://localhost:3100
 ```
 
@@ -119,6 +112,7 @@ release=$(git rev-parse --short HEAD)
 git archive HEAD | ssh nas "sudo /usr/local/bin/docker build \
   --build-arg NEXT_PUBLIC_SITE_URL=https://kaizhou.hk -t kaizhou-app:$release -"
 ssh nas 'cat > /volume1/docker/kaizhou-website/docker-compose.yml' < docker-compose.yml
+# Apply pending migrations as in step 4, then verify the new image before switching.
 ssh nas "cd /volume1/docker/kaizhou-website && \
   sudo /usr/local/bin/docker tag kaizhou-app:latest kaizhou-app:rollback && \
   sudo /usr/local/bin/docker tag kaizhou-app:$release kaizhou-app:latest && \
@@ -131,10 +125,60 @@ secret files, and this build's unused builder/dependency images once no containe
 uses them. Keep the deployed image and intentional rollback images. Do not use
 global prune commands on this shared Docker host.
 
-If the update changed collections/fields **or enabled a plugin that adds fields**
-(e.g. turning on Entra SSO adds `users.sub`), re-run the schema sync in step 4
-afterwards — `compose up` does not migrate the DB. Symptom of a skipped sync:
-the app boots but every query errors with `column ... does not exist`.
+Schema changes must have committed Payload migrations. Apply them from the matching
+full build image **before** switching the runtime; `compose up` does not migrate the DB.
+Never point development-mode schema push at production.
+
+## Versioned database migrations
+
+Production uses Node.js 24.22.2 and `NODE_ENV=production`. Schema push is enabled only
+in development. `pnpm db:migrate` applies pending migrations and records them in
+`payload_migrations`; `pnpm db:status` reports their status. Run one migration process
+at a time while member/role editing is paused, with a verified database backup.
+
+A fresh, empty database needs only `pnpm db:migrate`. For the existing database that
+was previously managed by schema push, adopt the baseline once from the full build
+environment, with production `DATABASE_URL`, `PAYLOAD_SECRET` and `ENTRA_*` configured:
+
+```sh
+NODE_ENV=production pnpm payload run scripts/baseline-database.ts dry-run
+NODE_ENV=production pnpm payload run scripts/baseline-database.ts apply
+pnpm db:migrate
+pnpm db:status
+```
+
+The baseline represents commit `3b4057e` with production SSO enabled. Adoption checks
+required tables, column types/nullability/defaults, enums, indexes and foreign keys.
+It refuses schema drift and unexpected migration history. Extra legacy password columns
+are retained. Only after verification does `apply` replace the old `dev` marker with
+the baseline record, in a transaction; it does not rewrite application data. Never
+manually mark the baseline as applied on a mismatched database. Reconcile differences
+against the backup in a disposable database first. A previously recorded baseline is
+a no-op, so the adoption command can safely be retried after an interrupted deployment.
+
+The next migration adds `titular_presidents` and its relationships. It does not move
+members: run the separate president-data migration below before switching the runtime.
+Its `down` refuses to drop a populated president table. The baseline cannot be undone
+with `migrate:down`; restore the intentional pre-deployment backup for a full rollback.
+
+For future schema changes, generate migrations with production SSO enabled (dummy
+values are sufficient for generation; it does not connect to Microsoft or the DB):
+
+```sh
+NODE_ENV=production ENTRA_CLIENT_ID=schema-generation \
+  ENTRA_CLIENT_SECRET=schema-generation ENTRA_TENANT_ID=schema-generation \
+  pnpm payload migrate:create describe_the_change
+```
+
+Review and commit both generated SQL/TypeScript and JSON snapshots. Test fresh install,
+upgrade, rerun and rollback against disposable Postgres databases, then run the same
+migration files in the full build environment. Keep dev push databases separate from
+migration-managed databases. Do not run `migrate:fresh` or `migrate:reset` on live data.
+
+`NODE_ENV=production pnpm payload run scripts/migrations.integration.test.ts` tests
+baseline adoption, drift rejection, data preservation, repeated upgrades and rollback
+protection. It requires an **empty disposable database named `migrations_test`**, with
+SSO enabled. Existing member tests use a separate `roles_test` development database.
 
 ## Backups
 
@@ -152,10 +196,10 @@ the app boots but every query errors with `column ... does not exist`.
 
 ## Committee role configuration migration
 
-The two member collections remain the source of person details. `committee-roles`
+The committee member collection remains the source of committee person details. `committee-roles`
 stores the ordered roles, colors, presentation style, and references to those records.
 The former committee `title` enum and member `order` fields remain intact for rollback;
-the new admin hides them. Honorary presidents' public-office `title` is unchanged.
+the committee admin hides them. President collections manage their own order and public-office `title`.
 
 Before deploying this change:
 
@@ -168,13 +212,13 @@ Before deploying this change:
    titles: `NODE_ENV=production pnpm payload run scripts/migrate-committee-roles.ts dry-run ./role-mapping.json`.
    An empty old title uses the key `""`. Keep mapping files local to the deployment
    workspace; do not add real member exports or working reports to the runtime image.
-4. Use the existing `scripts/db-push.ts` workflow to add the new global tables from the
-   full build image. This does not remove the existing member columns.
+4. Apply pending versioned schema migrations with `pnpm db:migrate` from the full
+   build image. If adopting an existing database, complete baseline verification first.
 5. Run `NODE_ENV=production pnpm payload run scripts/migrate-committee-roles.ts apply ./role-mapping.json`
    (omit the filename when all titles already match). It writes the assignments in one
    transaction and verifies member references before committing. Repeating `apply`
    leaves an already-saved configuration unchanged.
-6. Deploy the runtime and check `/admin/globals/committee-roles`, both member forms,
+6. Deploy the runtime and check `/admin/globals/committee-roles`, the member forms,
    and `/about`. The new page uses the existing admin/editor permissions. New people
    are created on the existing member pages and assigned through the role settings.
 
@@ -193,3 +237,36 @@ Verification: `pnpm lint`, `pnpm exec tsc --noEmit`, and
 `pnpm payload run src/lib/committee-roles.test.ts`. Database integration checks are in
 `scripts/committee-roles.integration.test.ts`; run them only against a disposable
 Postgres database named `roles_test`, with development schema push enabled.
+
+## Separate president sections
+
+This release adds a `titular-presidents` (名譽會長) collection. 榮譽會長 and 名譽會長
+have separate admin lists and fixed gold presentation on `/about`. Only 現任理事會
+uses the configurable roles. The old honorary relationship column is retained for
+migration compatibility; both the selector filter and save validation reject new
+honorary assignments to the committee.
+
+Before switching the runtime, pause member/role editing and back up the database.
+Use the full build environment to apply the additive schema with `pnpm db:migrate`,
+then run:
+
+```sh
+NODE_ENV=production pnpm payload run scripts/split-president-sections.ts dry-run
+NODE_ENV=production pnpm payload run scripts/split-president-sections.ts apply
+```
+
+The migration preserves saved order and moves members assigned to the two president
+roles into their respective collections, including retired members. Existing honorary
+records in the honorary role stay in place. When copying between collections, the
+original record is retained with `isCurrent: false`; names, public titles or bios,
+photos and current status are copied. Remaining committee roles keep their settings.
+Duplicate assignments, missing members or honorary members assigned to other committee
+roles abort the transaction for review. Repeating a successful apply makes no changes.
+A dry run rolls back without writing data.
+
+For installations with no saved roles, use the initial committee role migration above;
+president lists are independent and require no role assignment. Verify all three
+sections and admin lists before reopening editing. Rollback after moving records
+requires restoring the pre-migration database backup along with the previous release.
+Keep migration scripts and evidence in the build workspace; remove disposable staging
+and test containers when finished, retaining intentional recovery backups.

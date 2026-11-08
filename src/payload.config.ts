@@ -19,6 +19,7 @@ import { News } from "./collections/News";
 import { Activities } from "./collections/Activities";
 import { CommitteeMembers } from "./collections/CommitteeMembers";
 import { HonoraryPresidents } from "./collections/HonoraryPresidents";
+import { TitularPresidents } from "./collections/TitularPresidents";
 import { Enquiries } from "./collections/Enquiries";
 import { CommitteeRoles } from "./globals/CommitteeRoles";
 import { SiteSettings } from "./globals/SiteSettings";
@@ -101,7 +102,7 @@ export default buildConfig({
   },
   // Order drives the admin nav: content first (the editor's daily work),
   // media/enquiries next, admin-only (Users) last.
-  collections: [News, Activities, CommitteeMembers, HonoraryPresidents, Media, Enquiries, Users],
+  collections: [News, Activities, HonoraryPresidents, TitularPresidents, CommitteeMembers, Media, Enquiries, Users],
   globals: [CommitteeRoles, SiteSettings],
   // Microsoft Entra ID (Azure AD) SSO — active only when ENTRA_CLIENT_ID is set
   // (production). Until then it's a no-op and email/password login is used.
@@ -123,12 +124,9 @@ export default buildConfig({
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
   db: postgresAdapter({
-    // Auto-sync the schema in development. In production it stays OFF so the
-    // running app never mutates the schema — run the one-off `db:push` script
-    // (PAYLOAD_DB_PUSH=true, via the full build image) to create/update it.
-    push:
-      process.env.NODE_ENV !== "production" ||
-      process.env.PAYLOAD_DB_PUSH === "true",
+    // Production schema changes run through the versioned Payload migrations.
+    push: process.env.NODE_ENV === "development",
+    migrationDir: path.resolve(dirname, "migrations"),
     pool: {
       connectionString: DATABASE_URL,
     },

@@ -7,10 +7,7 @@ export async function loadCommitteeRoster(payload: Payload): Promise<CommitteeTi
   const settings = await payload.findGlobal({ slug: "committee-roles", depth: 2 });
   if (!settings.updatedAt) {
     // shortcut: preserve legacy content before migration; remove after all environments migrate.
-    const [committee, honorary] = await Promise.all([
-      payload.find({ collection: "committee-members", pagination: false, sort: ["order", "id"], where: { isCurrent: { equals: true } } }),
-      payload.find({ collection: "honorary-presidents", pagination: false, sort: ["order", "id"], where: { isCurrent: { equals: true } } }),
-    ]);
+    const committee = await payload.find({ collection: "committee-members", pagination: false, sort: ["order", "id"], where: { isCurrent: { equals: true } } });
     const roles = INITIAL_COMMITTEE_ROLES.map((role): CommitteeTier => ({ ...role, id: role.name, members: [] }));
     for (const member of committee.docs) {
       const name = member.title || "理事會成員";
@@ -21,19 +18,38 @@ export async function loadCommitteeRoster(payload: Payload): Promise<CommitteeTi
       }
       role.members.push({ id: `committee-members:${member.id}`, name: member.name, bio: member.bio ?? undefined, photo: pickImage(member.photo, "thumbnail") });
     }
-    roles[0].members = honorary.docs.map((member) => ({ id: `honorary-presidents:${member.id}`, name: member.name, bio: member.title ?? undefined, photo: pickImage(member.photo, "thumbnail") }));
     return roles.filter((role) => role.members.length);
   }
-  return (settings.roles ?? []).map((role): CommitteeTier => ({
+  return (settings.roles ?? []).filter((role) => role.name.trim() !== "榮譽會長" && role.name.trim() !== "名譽會長").map((role): CommitteeTier => ({
     id: role.id!, name: role.name, color: role.color, appearance: role.appearance,
     members: (role.members ?? []).flatMap((reference) => {
-      if (typeof reference.value !== "object" || !reference.value || !reference.value.isCurrent) return [];
+      if (reference.relationTo !== "committee-members" || typeof reference.value !== "object" || !reference.value || !reference.value.isCurrent) return [];
       const member = reference.value;
       return [{
         id: memberKey(reference), name: member.name,
-        bio: (reference.relationTo === "honorary-presidents" ? reference.value.title : reference.value.bio) ?? undefined,
+        bio: reference.value.bio ?? undefined,
         photo: pickImage(member.photo, "thumbnail"),
       }];
     }),
   })).filter((role) => role.members.length);
+}
+
+export async function loadPresidentBoards(payload: Payload): Promise<CommitteeTier[]> {
+  return Promise.all(([
+    { collection: "honorary-presidents", name: "榮譽會長" },
+    { collection: "titular-presidents", name: "名譽會長" },
+  ] as const).map(async ({ collection, name }): Promise<CommitteeTier> => {
+    const result = await payload.find({
+      collection,
+      pagination: false, depth: 1, sort: ["order", "id"],
+      where: { isCurrent: { equals: true } },
+    });
+    return {
+      id: collection, name, color: "#c5a55a", appearance: "honorary",
+      members: result.docs.map((member) => ({
+        id: `${collection}:${member.id}`, name: member.name,
+        bio: member.title ?? undefined, photo: pickImage(member.photo, "thumbnail"),
+      })),
+    };
+  }));
 }

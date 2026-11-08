@@ -5,11 +5,11 @@ export const HonoraryPresidents: CollectionConfig = {
   slug: "honorary-presidents",
   labels: { singular: "榮譽會長", plural: "榮譽會長" },
   admin: {
-    group: "內容",
+    group: "會長名單",
     useAsTitle: "name",
     defaultColumns: ["name", "title", "isCurrent"],
     listSearchableFields: ["name", "title"],
-    description: "管理榮譽會長資料（政府及各界嘉賓）。展示職銜及順序請到「職銜與排序」設定。",
+    description: "管理榮譽會長資料及顯示順序，於前台獨立區塊展示，顏色固定。",
   },
   access: {
     read: anyone,
@@ -19,13 +19,11 @@ export const HonoraryPresidents: CollectionConfig = {
   },
   defaultSort: "order",
   fields: [
-    { name: "assignedRole", type: "ui", admin: { components: { Field: "/components/admin/MemberRole" } } },
     { name: "name", type: "text", required: true, label: "姓名" },
     {
       name: "title",
       type: "text",
       label: "公職／銜頭",
-      // Public office stays separate from the association role in 職銜與排序.
       admin: { description: "現任公職或銜頭，顯示於姓名下方。例：立法會議員、民政事務總署署長。" },
     },
     {
@@ -33,12 +31,12 @@ export const HonoraryPresidents: CollectionConfig = {
       type: "number",
       label: "顯示順序",
       defaultValue: 100,
-      admin: { hidden: true },
+      admin: { description: "數字越小越先顯示；相同時按建立順序排列。" },
     },
     {
       name: "isCurrent",
       type: "checkbox",
-      label: "現任榮譽會長",
+      label: "現任成員",
       defaultValue: true,
       admin: { position: "sidebar", description: "勾選＝現任；取消＝已卸任（仍保留記錄）。" },
     },

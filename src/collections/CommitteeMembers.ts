@@ -5,7 +5,7 @@ export const CommitteeMembers: CollectionConfig = {
   slug: "committee-members",
   labels: { singular: "理事會成員", plural: "理事會成員" },
   admin: {
-    group: "內容",
+    group: "現任理事會",
     useAsTitle: "name",
     defaultColumns: ["name", "isCurrent"],
     listSearchableFields: ["name"],

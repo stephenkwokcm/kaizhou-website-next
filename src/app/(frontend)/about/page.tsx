@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { safePayloadQuery } from "@/lib/payload";
 import { pageMetadata } from "@/lib/seo";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CommitteeRoster } from "@/components/sections/about/CommitteeRoster";
-import { loadCommitteeRoster } from "@/lib/committee-roster";
+import { loadCommitteeRoster, loadPresidentBoards } from "@/lib/committee-roster";
 
 export const metadata: Metadata = pageMetadata(
   "關於我們",
@@ -17,7 +18,10 @@ export const metadata: Metadata = pageMetadata(
 );
 
 export default async function AboutPage() {
-  const roles = await safePayloadQuery(loadCommitteeRoster, []);
+  const [roles, presidents] = await Promise.all([
+    safePayloadQuery(loadCommitteeRoster, []),
+    safePayloadQuery(loadPresidentBoards, []),
+  ]);
 
   return (
     <article className="pt-32 pb-16">
@@ -83,6 +87,28 @@ export default async function AboutPage() {
       </section>
 
       <InkDivider />
+
+      {[
+        { name: "榮譽會長", en: "Honorary Presidents", seal: "榮譽" },
+        { name: "名譽會長", en: "Titular Presidents", seal: "名譽" },
+      ].map(({ name, en, seal }) => {
+        const board = presidents.find((board) => board.name === name);
+        return (
+          <Fragment key={name}>
+            <section className="container-page" aria-label={name}>
+              <RevealOnScroll>
+                <SectionTitle zh={name} en={en} seal={seal} />
+              </RevealOnScroll>
+              {board?.members.length ? (
+                <CommitteeRoster roles={[board]} />
+              ) : (
+                <EmptyState message={`${name}名單即將公佈`} />
+              )}
+            </section>
+            <InkDivider />
+          </Fragment>
+        );
+      })}
 
       {/* Current committee */}
       <section className="container-page">

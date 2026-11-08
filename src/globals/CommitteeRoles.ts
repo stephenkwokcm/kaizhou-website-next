@@ -6,18 +6,15 @@ export const CommitteeRoles: GlobalConfig = {
   slug: "committee-roles",
   label: "職銜與排序",
   admin: {
-    group: "內容",
-    description: "拖曳職銜調整前台順序。成員資料仍於「理事會成員」及「榮譽會長」管理；此處只分配現有成員。",
+    group: "現任理事會",
+    description: "只設定「現任理事會」的職銜、顏色及排序，只可加入「理事會成員」。榮譽會長及名譽會長於各自頁面管理。",
   },
   access: { read: anyone, update: adminOrEditor },
   hooks: {
     beforeChange: [async ({ data, originalDoc, req, context }) => {
       if (!originalDoc?.updatedAt && !context.committeeRoleMigration) {
-        const counts = await Promise.all([
-          req.payload.count({ collection: "committee-members", req }),
-          req.payload.count({ collection: "honorary-presidents", req }),
-        ]);
-        if (counts.some((count) => count.totalDocs > 0)) {
+        const count = await req.payload.count({ collection: "committee-members", req });
+        if (count.totalDocs > 0) {
           throw new APIError("請先執行職銜遷移，保留現有成員分配後再編輯。", 400);
         }
       }
@@ -56,10 +53,12 @@ export const CommitteeRoles: GlobalConfig = {
         },
         {
           name: "members", type: "relationship", label: "成員", hasMany: true,
+          // shortcut: retain the old relation column for safe migration; remove after all environments split their president sections.
           relationTo: ["committee-members", "honorary-presidents"],
+          filterOptions: ({ relationTo }) => relationTo === "committee-members",
           admin: {
             allowCreate: false, allowEdit: false, isSortable: true,
-            description: "選取現有成員，拖曳調整同一職銜內的順序。已卸任成員保留分配，但不會顯示於前台。",
+            description: "只可選取理事會成員，拖曳調整同一職銜內的順序。已卸任成員保留分配，但不會顯示於前台。",
           },
         },
       ],
