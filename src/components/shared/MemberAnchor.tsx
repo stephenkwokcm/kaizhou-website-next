@@ -1,3 +1,4 @@
+import { sealTextColor } from "@/lib/committee-roles";
 import { MediaImage } from "@/components/shared/MediaImage";
 import type { ImageData } from "@/lib/media";
 
@@ -30,10 +31,12 @@ export function MemberAnchor({
   member,
   size,
   tone = "vermillion",
+  color,
 }: {
   member: AnchoredMember;
   size: number;
   tone?: keyof typeof TONES;
+  color?: string;
 }) {
   const t = TONES[tone];
 
@@ -41,7 +44,7 @@ export function MemberAnchor({
     return (
       <span
         className={`relative block shrink-0 overflow-hidden rounded-full ring-1 ${t.ring} transition-transform duration-500 group-hover:-translate-y-0.5`}
-        style={{ width: size, height: size }}
+        style={{ width: size, height: size, ...(color ? { boxShadow: `0 0 0 1px ${color}80` } : {}) }}
       >
         <MediaImage image={member.photo} aspectRatio="1 / 1" label="" sizes={`${size}px`} />
       </span>
@@ -52,7 +55,14 @@ export function MemberAnchor({
     <span
       aria-hidden="true"
       className={`relative grid shrink-0 place-items-center rounded-[7px] ring-1 ${t.seal} transition-transform duration-500 group-hover:-translate-y-0.5`}
-      style={{ width: size, height: size }}
+      style={{
+        width: size, height: size,
+        ...(color ? {
+          backgroundColor: tone === "gold" ? "#1a1a1a" : color,
+          color: tone === "gold" ? color : sealTextColor(color),
+          boxShadow: `0 0 0 1px ${color}66, 0 8px 24px -10px ${color}88`,
+        } : {}),
+      }}
     >
       {/* carved inner border, like an engraved seal */}
       <span className={`pointer-events-none absolute inset-[3px] rounded-[4px] ring-1 ${t.carve}`} />

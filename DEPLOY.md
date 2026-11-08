@@ -148,3 +148,48 @@ the app boots but every query errors with `column ... does not exist`.
   resetting it in Postgres.
 - Email is not configured (no SMTP) — admin password resets are done via the
   Payload Local API, not the "Forgot password" link. See the main README.
+
+
+## Committee role configuration migration
+
+The two member collections remain the source of person details. `committee-roles`
+stores the ordered roles, colors, presentation style, and references to those records.
+The former committee `title` enum and member `order` fields remain intact for rollback;
+the new admin hides them. Honorary presidents' public-office `title` is unchanged.
+
+Before deploying this change:
+
+1. Back up the target database using the existing backup process.
+2. From the full build environment, run the migration in read-only mode against the
+   target database: `NODE_ENV=production pnpm payload run scripts/migrate-committee-roles.ts dry-run`.
+   This reads **all** records, including retired members. Resolve every reported legacy
+   title with the content owner; no mapping is assumed.
+3. If needed, supply a JSON file whose keys are old titles and values are exact new
+   titles: `NODE_ENV=production pnpm payload run scripts/migrate-committee-roles.ts dry-run ./role-mapping.json`.
+   An empty old title uses the key `""`. Keep mapping files local to the deployment
+   workspace; do not add real member exports or working reports to the runtime image.
+4. Use the existing `scripts/db-push.ts` workflow to add the new global tables from the
+   full build image. This does not remove the existing member columns.
+5. Run `NODE_ENV=production pnpm payload run scripts/migrate-committee-roles.ts apply ./role-mapping.json`
+   (omit the filename when all titles already match). It writes the assignments in one
+   transaction and verifies member references before committing. Repeating `apply`
+   leaves an already-saved configuration unchanged.
+6. Deploy the runtime and check `/admin/globals/committee-roles`, both member forms,
+   and `/about`. The new page uses the existing admin/editor permissions. New people
+   are created on the existing member pages and assigned through the role settings.
+
+Until the first configuration is saved, the frontend retains legacy member content.
+The admin prevents an initial save over existing members until migration has run.
+An intentionally saved empty configuration displays the normal empty state.
+Public pages retain their existing five-minute revalidation interval.
+
+For rollback, restore the prior application release; legacy titles and member records
+are retained. If editors changed assignments after migration, review those changes
+before rolling back because the legacy role values are not synchronized afterward.
+Remove temporary migration containers and staging files when finished; retain the
+intentional database backup according to the existing recovery policy.
+
+Verification: `pnpm lint`, `pnpm exec tsc --noEmit`, and
+`pnpm payload run src/lib/committee-roles.test.ts`. Database integration checks are in
+`scripts/committee-roles.integration.test.ts`; run them only against a disposable
+Postgres database named `roles_test`, with development schema push enabled.

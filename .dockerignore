@@ -12,3 +12,6 @@ kaizhou-claude-code-prompt.md
 Dockerfile
 .dockerignore
 docker-compose.yml
+
+# Local design prototypes are not deployment inputs.
+prototypes

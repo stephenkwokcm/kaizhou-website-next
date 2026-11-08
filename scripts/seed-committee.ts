@@ -23,6 +23,10 @@ const MEMBERS: { order: number; title: string; name: string; bio?: string }[] = 
 ];
 
 const payload = await getPayload({ config });
+const roles = await payload.findGlobal({ slug: "committee-roles", depth: 0 });
+if (roles.updatedAt) {
+  throw new Error("Role configuration is active. Manage members through the admin instead of reseeding legacy titles.");
+}
 
 for (const m of MEMBERS) {
   const data = {

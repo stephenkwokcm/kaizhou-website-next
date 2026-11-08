@@ -23,6 +23,9 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_4b1ca92051ed4b280bb7a4206e00fbb5 } from '../../../components/admin/ContentStarter'
+import { default as default_9fc7de01c7dc5fe2b6424990f2f58eba } from '../../../components/admin/MemberRole'
+import { default as default_2e0a2e1bc33615dedfebef2f0968c690 } from '../../../components/admin/RoleColor'
+import { default as default_b1830090a2a693c68dcd0fcbf9ffab78 } from '../../../components/admin/RoleRowLabel'
 import { default as default_dfe4008080d895d460898c3a6155e9ba } from '../../../components/admin/Icon'
 import { default as default_91a09b539d3c86b0aebf520e7564ce08 } from '../../../components/admin/Logo'
 import { default as default_527cb6ea03a8cd52ace999dddf7d43a7 } from '../../../components/admin/BeforeLogin'
@@ -57,6 +60,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/components/admin/ContentStarter#default": default_4b1ca92051ed4b280bb7a4206e00fbb5,
+  "/components/admin/MemberRole#default": default_9fc7de01c7dc5fe2b6424990f2f58eba,
+  "/components/admin/RoleColor#default": default_2e0a2e1bc33615dedfebef2f0968c690,
+  "/components/admin/RoleRowLabel#default": default_b1830090a2a693c68dcd0fcbf9ffab78,
   "/components/admin/Icon#default": default_dfe4008080d895d460898c3a6155e9ba,
   "/components/admin/Logo#default": default_91a09b539d3c86b0aebf520e7564ce08,
   "/components/admin/BeforeLogin#default": default_527cb6ea03a8cd52ace999dddf7d43a7,

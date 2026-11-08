@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { INITIAL_COMMITTEE_ROLES, memberKey, migrateRoleAssignments, sealTextColor, validateRoleAssignments } from "./committee-roles";
+
+assert.deepEqual(INITIAL_COMMITTEE_ROLES.map((role) => role.name), ["榮譽會長", "名譽會長", "會長", "常務會長", "副會長", "秘書長", "副秘書長", "司庫", "常務理事", "顧問", "義務法律顧問"]);
+const roles = migrateRoleAssignments([{ id: 2, title: "副會長" }, { id: 1, title: "副會長" }], [{ id: 1, title: "公職保留" }]);
+assert.deepEqual(roles.find((role) => role.name === "副會長")?.members?.map((member) => member.value), [2, 1]);
+assert.equal(memberKey(roles[0].members![0]), "honorary-presidents:1");
+assert.equal(validateRoleAssignments(roles), true);
+assert.equal(validateRoleAssignments([...roles].reverse()), true);
+assert.equal(memberKey({ relationTo: "committee-members", value: { id: 1 } }), "committee-members:1");
+assert.throws(() => migrateRoleAssignments([{ id: 1, title: "常務副會長" }], []), /常務副會長/);
+assert.throws(() => migrateRoleAssignments([{ id: 1 }], []), /未設定職銜/);
+assert.throws(() => migrateRoleAssignments([{ id: 1, title: "常務副會長" }], [], { 常務副會長: "不存在" }), /常務副會長/);
+const mapped = migrateRoleAssignments([{ id: 1, title: "常務副會長" }], [], { 常務副會長: "常務會長" });
+assert.equal(mapped[3].members?.length, 1);
+assert.equal(INITIAL_COMMITTEE_ROLES[3].members, undefined);
+assert.notEqual(validateRoleAssignments([roles[0], { ...roles[0], name: "另一職銜" }]), true);
+assert.notEqual(validateRoleAssignments([roles[0], { ...roles[0], members: [] }]), true);
+assert.notEqual(validateRoleAssignments([{ ...roles[0], name: " " }]), true);
+assert.equal(sealTextColor("#ffffff"), "#1a1a1a");
+assert.equal(sealTextColor("#8b2323"), "#ffffff");
+console.log("committee-roles.test.ts: all assertions passed");

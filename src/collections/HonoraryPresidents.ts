@@ -7,9 +7,9 @@ export const HonoraryPresidents: CollectionConfig = {
   admin: {
     group: "內容",
     useAsTitle: "name",
-    defaultColumns: ["name", "title", "isCurrent", "order"],
+    defaultColumns: ["name", "title", "isCurrent"],
     listSearchableFields: ["name", "title"],
-    description: "管理本會敦聘的榮譽會長名錄（政府及各界嘉賓）。",
+    description: "管理榮譽會長資料（政府及各界嘉賓）。展示職銜及順序請到「職銜與排序」設定。",
   },
   access: {
     read: anyone,
@@ -19,14 +19,13 @@ export const HonoraryPresidents: CollectionConfig = {
   },
   defaultSort: "order",
   fields: [
+    { name: "assignedRole", type: "ui", admin: { components: { Field: "/components/admin/MemberRole" } } },
     { name: "name", type: "text", required: true, label: "姓名" },
     {
       name: "title",
       type: "text",
       label: "公職／銜頭",
-      // ponytail: free text, not a select like 理事會成員.職銜 — government offices
-      // are open-ended (立法會議員、局長、區議員…) and would need an enum edit plus a
-      // schema push for every new appointee.
+      // Public office stays separate from the association role in 職銜與排序.
       admin: { description: "現任公職或銜頭，顯示於姓名下方。例：立法會議員、民政事務總署署長。" },
     },
     {
@@ -34,7 +33,7 @@ export const HonoraryPresidents: CollectionConfig = {
       type: "number",
       label: "顯示順序",
       defaultValue: 100,
-      admin: { position: "sidebar", description: "數字越小越靠前。名次按禮節排列，請自行編定。預設 100。" },
+      admin: { hidden: true },
     },
     {
       name: "isCurrent",

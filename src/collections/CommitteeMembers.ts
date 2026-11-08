@@ -7,9 +7,9 @@ export const CommitteeMembers: CollectionConfig = {
   admin: {
     group: "內容",
     useAsTitle: "name",
-    defaultColumns: ["name", "title", "isCurrent", "order"],
-    listSearchableFields: ["name", "title"],
-    description: "管理理事會成員名錄。",
+    defaultColumns: ["name", "isCurrent"],
+    listSearchableFields: ["name"],
+    description: "管理理事會成員資料。職銜及前台順序請到「職銜與排序」設定。",
   },
   access: {
     read: anyone,
@@ -19,17 +19,15 @@ export const CommitteeMembers: CollectionConfig = {
   },
   defaultSort: "order",
   fields: [
+    { name: "assignedRole", type: "ui", admin: { components: { Field: "/components/admin/MemberRole" } } },
     { name: "name", type: "text", required: true, label: "姓名" },
     {
       name: "title",
       type: "select",
-      label: "職銜",
-      admin: { description: "從清單選擇職銜。" },
-      // Values == labels (Chinese). This set MUST be a superset of every 職銜
-      // in every environment (prod incl. 常務副會長 / 司庫) so the text→enum
-      // schema push converts cleanly. A value not listed here renders as a
-      // BLANK cell in the admin list and fails save validation — so add any
-      // new title here BEFORE assigning it to anyone.
+      label: "舊職銜（遷移備份）",
+      admin: { hidden: true },
+      access: { create: () => false, update: () => false },
+      // Preserve the existing enum and values for migration and rollback only.
       options: [
         { label: "創會會長", value: "創會會長" },
         { label: "會長", value: "會長" },
@@ -51,7 +49,7 @@ export const CommitteeMembers: CollectionConfig = {
       type: "number",
       label: "顯示順序",
       defaultValue: 100,
-      admin: { position: "sidebar", description: "數字越小越靠前（例：會長 1、副會長 2）。預設 100。" },
+      admin: { hidden: true },
     },
     {
       name: "isCurrent",
