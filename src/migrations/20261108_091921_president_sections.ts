@@ -3,16 +3,16 @@ import { type MigrateUpArgs, type MigrateDownArgs, sql } from '@payloadcms/db-po
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TABLE "titular_presidents" (
-  	"id" serial PRIMARY KEY NOT NULL,
-  	"name" varchar NOT NULL,
-  	"title" varchar,
-  	"order" numeric DEFAULT 100,
-  	"is_current" boolean DEFAULT true,
-  	"photo_id" integer,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+    "id" serial PRIMARY KEY NOT NULL,
+    "name" varchar NOT NULL,
+    "title" varchar,
+    "order" numeric DEFAULT 100,
+    "is_current" boolean DEFAULT true,
+    "photo_id" integer,
+    "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+    "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
-  
+
   ALTER TABLE "payload_locked_documents_rels" ADD COLUMN "titular_presidents_id" integer;
   ALTER TABLE "titular_presidents" ADD CONSTRAINT "titular_presidents_photo_id_media_id_fk" FOREIGN KEY ("photo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   CREATE INDEX "titular_presidents_photo_idx" ON "titular_presidents" USING btree ("photo_id");
