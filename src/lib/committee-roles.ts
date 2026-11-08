@@ -43,7 +43,9 @@ export function validateRoleAssignments(roles: RoleConfiguration[]): true | stri
 }
 
 export function sealTextColor(color: string): string {
-  const [r, g, b] = color.slice(1).match(/../g)!.map((hex) => {
+  const channels = color.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (!channels) return "#ffffff";
+  const [r, g, b] = channels.slice(1).map((hex) => {
     const value = parseInt(hex, 16) / 255;
     return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
   });
@@ -58,10 +60,11 @@ export function migrateRoleAssignments(
   mapping: Record<string, string> = {},
 ): RoleConfiguration[] {
   const roles = INITIAL_COMMITTEE_ROLES.map((role) => ({ ...role, members: [] as MemberReference[] }));
+  const rolesByName = new Map(roles.map((role) => [role.name, role]));
   const unresolved = new Set<string>();
   for (const member of committee) {
     const title = member.title ?? "";
-    const role = roles.find((role) => role.name === (mapping[title] ?? title));
+    const role = rolesByName.get(mapping[title] ?? title);
     if (!role) unresolved.add(title || "（未設定職銜）");
     else role.members.push({ relationTo: "committee-members", value: member.id });
   }

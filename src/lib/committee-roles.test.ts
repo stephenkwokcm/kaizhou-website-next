@@ -19,4 +19,9 @@ assert.notEqual(validateRoleAssignments([roles[0], { ...roles[0], members: [] }]
 assert.notEqual(validateRoleAssignments([{ ...roles[0], name: " " }]), true);
 assert.equal(sealTextColor("#ffffff"), "#1a1a1a");
 assert.equal(sealTextColor("#8b2323"), "#ffffff");
+assert.equal(sealTextColor("#FFFFFF"), "#1a1a1a");
+assert.equal(sealTextColor("#000000"), "#ffffff");
+for (const color of ["", "#fff", "#gggggg", "ffffff", "#12345678"]) {
+  assert.equal(sealTextColor(color), "#ffffff");
+}
 console.log("committee-roles.test.ts: all assertions passed");
