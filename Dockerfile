@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Multi-stage build producing a minimal Next.js standalone image.
 
-FROM node:24.22.2-bookworm-slim AS base
+FROM node:26.13.0-bookworm-slim AS base
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable
