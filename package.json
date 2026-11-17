@@ -27,7 +27,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
     "graphql": "^16.14.2",
-    "next": "16.4.3",
+    "next": "16.4.5",
     "payload": "3.92.1",
     "payload-oauth2": "1.0.21",
     "react": "19.3.0",
